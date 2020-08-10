@@ -160,13 +160,39 @@ class GuidedAttentionLoss(torch.nn.Module):
         out_masks = sequence_mask(olens)
         return out_masks.unsqueeze(-1) & in_masks.unsqueeze(-2)
 
+class SpeakerEncoderLoss(torch.nn.Module):
+    def __init__(self, beta=1):
+        super(SpeakerEncoderLoss, self).__init__()
+        self.beta = beta
+        self.criterion = nn.MSELoss()
+
+    def forward(self, speaker_encoder_model, mel_input, decoder_output, output_lens):
+        # we can compute direct from input, but the zero padding is considered in loss, and its not is good
+        # input_speaker_embeddings = self.speaker_encoder_model.inference(mel_input).detach()
+        # output_speaker_embeddings = self.speaker_encoder_model.inference(decoder_output).detach()
+        # the better choise is remove the padding and compute embedding but its more slow ...
+        inp_se_list = []
+        out_se_list = []
+        for i in range(output_lens.size(0)):
+            # remove the zero padding and compute speaker embedding
+            inp_emb = speaker_encoder_model.compute_embedding(mel_input[i][:output_lens[i], :].unsqueeze(0))
+            out_emb = speaker_encoder_model.compute_embedding(decoder_output[i][:output_lens[i], :].unsqueeze(0))
+            # append in a list
+            inp_se_list.append(inp_emb)
+            out_se_list.append(out_emb)
+        # convert lists to tensors and detach for not update weight in speaker encoder
+        input_speaker_embeddings = torch.stack(inp_se_list, dim=0).detach()
+        output_speaker_embeddings = torch.stack(out_se_list, dim=0).detach()
+        # compute and return loss
+        return self.beta * self.criterion(input_speaker_embeddings, output_speaker_embeddings)
 
 class TacotronLoss(torch.nn.Module):
-    def __init__(self, c, stopnet_pos_weight=10, ga_sigma=0.4):
+    def __init__(self, c, stopnet_pos_weight=10, ga_sigma=0.4, speaker_encoder_model=None):
         super(TacotronLoss, self).__init__()
         self.stopnet_pos_weight = stopnet_pos_weight
         self.ga_alpha = c.ga_alpha
         self.config = c
+        self.speaker_encoder_model = speaker_encoder_model
         # postnet decoder loss
         if c.loss_masking:
             self.criterion = L1LossMasked(c.seq_len_norm) if c.model in [
@@ -182,9 +208,13 @@ class TacotronLoss(torch.nn.Module):
         # pylint: disable=not-callable
         self.criterion_st = BCELossMasked(pos_weight=torch.tensor(stopnet_pos_weight)) if c.stopnet else None
 
+        if c.use_speaker_encoder_loss:
+            self.criterion_se = SpeakerEncoderLoss(beta=c.speaker_encoder_loss_beta)
+
     def forward(self, postnet_output, decoder_output, mel_input, linear_input,
                 stopnet_output, stopnet_target, output_lens, decoder_b_output,
-                alignments, alignment_lens, alignments_backwards, input_lens):
+                alignments, alignment_lens, alignments_backwards, input_lens,
+                speaker_embeddings=None):
 
         return_dict = {}
         # decoder and postnet losses
@@ -240,6 +270,12 @@ class TacotronLoss(torch.nn.Module):
             ga_loss = self.criterion_ga(alignments, input_lens, alignment_lens)
             loss += ga_loss * self.ga_alpha
             return_dict['ga_loss'] = ga_loss * self.ga_alpha
+
+        # speaker encoder extra loss (if enabled)
+        if self.config.use_speaker_encoder_loss:
+            se_loss = self.criterion_se(self.speaker_encoder_model, mel_input, decoder_output, output_lens)
+            loss += se_loss
+            return_dict['se_loss'] = se_loss
 
         return_dict['loss'] = loss
         return return_dict

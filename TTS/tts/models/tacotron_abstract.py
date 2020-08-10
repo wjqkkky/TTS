@@ -31,7 +31,8 @@ class TacotronAbstract(ABC, nn.Module):
                  gst=False,
                  gst_embedding_dim=512,
                  gst_num_heads=4,
-                 gst_style_tokens=10):
+                 gst_style_tokens=10,
+                 disable_gst=False):
         """ Abstract Tacotron class """
         super().__init__()
         self.num_chars = num_chars
@@ -42,6 +43,7 @@ class TacotronAbstract(ABC, nn.Module):
         self.gst_embedding_dim = gst_embedding_dim
         self.gst_num_heads = gst_num_heads
         self.gst_style_tokens = gst_style_tokens
+        self.disable_gst = disable_gst
         self.num_speakers = num_speakers
         self.bidirectional_decoder = bidirectional_decoder
         self.double_decoder_consistency = double_decoder_consistency

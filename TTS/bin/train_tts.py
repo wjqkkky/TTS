@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from TTS.tts.datasets.preprocess import load_meta_data
 from TTS.tts.datasets.TTSDataset import MyDataset
 from TTS.tts.layers.losses import TacotronLoss
+from TTS.speaker_encoder.model import SpeakerEncoder
 from TTS.tts.utils.distribute import (DistributedSampler,
                                       apply_gradient_allreduce,
                                       init_distributed, reduce_tensor)
@@ -177,7 +178,7 @@ def train(model, criterion, optimizer, optimizer_st, scheduler,
                               linear_input, stop_tokens, stop_targets,
                               mel_lengths, decoder_backward_output,
                               alignments, alignment_lengths, alignments_backward,
-                              text_lengths)
+                              text_lengths, speaker_embeddings)
 
         # backward pass
         loss_dict['loss'].backward()
@@ -334,7 +335,7 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
                                   linear_input, stop_tokens, stop_targets,
                                   mel_lengths, decoder_backward_output,
                                   alignments, alignment_lengths, alignments_backward,
-                                  text_lengths)
+                                  text_lengths, speaker_embeddings)
 
             # step time
             step_time = time.time() - start_time
@@ -516,6 +517,30 @@ def main(args):  # pylint: disable=redefined-outer-name
 
     model = setup_model(num_chars, num_speakers, c, speaker_embedding_dim)
 
+    # load speaker encoder for use 
+    if c.use_speaker_encoder_loss:
+        speaker_encoder_c = load_config(c.speaker_encoder_config_path)
+        if set(c.audio) != set(speaker_encoder_c.audio):
+            '''for key in c.audio.keys():
+                print(key, c.audio[key] == speaker_encoder_c.audio[key])'''
+            print("TTS Config:\n",c.audio,"\nSpeaker Encoder Config:\n", speaker_encoder_c.audio)
+            raise "The audio configuration between the TTS model and the Speaker Encoder model must be the same, otherwise it will not be possible to calculate the embeddings."
+        # create speaker_encoder_model
+        speaker_encoder_model = SpeakerEncoder(**speaker_encoder_c.model)
+
+        # load speaker encoder model
+        speaker_encoder_checkpoint = torch.load(c.speaker_encoder_checkpoint_path, map_location='cpu')
+        speaker_encoder_model.load_state_dict(speaker_encoder_checkpoint['model'])
+        
+        num_params = count_parameters(speaker_encoder_model)
+        print("\n > Speaker Encoder has {} parameters \n".format(num_params), flush=True)
+
+        if use_cuda:
+            speaker_encoder_model = speaker_encoder_model.cuda()
+        speaker_encoder_model.eval()
+    else:
+        speaker_encoder_model = None
+
     params = set_weight_decay(model, c.wd)
     optimizer = RAdam(params, lr=c.lr, weight_decay=0)
     if c.stopnet and c.separate_stopnet:
@@ -526,7 +551,7 @@ def main(args):  # pylint: disable=redefined-outer-name
         optimizer_st = None
 
     # setup criterion
-    criterion = TacotronLoss(c, stopnet_pos_weight=10.0, ga_sigma=0.4)
+    criterion = TacotronLoss(c, stopnet_pos_weight=10.0, ga_sigma=0.4, speaker_encoder_model=speaker_encoder_model)
 
     if args.restore_path:
         checkpoint = torch.load(args.restore_path, map_location='cpu')
@@ -576,6 +601,7 @@ def main(args):  # pylint: disable=redefined-outer-name
 
     global_step = args.restore_step
     for epoch in range(0, c.epochs):
+        
         c_logger.print_epoch_start(epoch, c.epochs)
         # set gradual training
         if c.gradual_training is not None:
@@ -585,6 +611,7 @@ def main(args):  # pylint: disable=redefined-outer-name
             if c.bidirectional_decoder:
                 model.decoder_backward.set_r(r)
             print("\n > Number of output frames:", model.decoder.r)
+        eval_avg_loss_dict = evaluate(model, criterion, ap, global_step, epoch, speaker_mapping)
         train_avg_loss_dict, global_step = train(model, criterion, optimizer,
                                                  optimizer_st, scheduler, ap,
                                                  global_step, epoch, speaker_mapping)

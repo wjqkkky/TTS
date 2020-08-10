@@ -23,6 +23,7 @@
 
         // Griffin-Lim
         "power": 1.5,           // value to sharpen wav signals after GL algorithm.
+        "stft_pad_mode": "reflect",
         "griffin_lim_iters": 60,// #griffin-lim iterations. 30-60 is a good range. Larger the value, slower the generation.
 
         // MelSpectrogram parameters
@@ -130,6 +131,10 @@
     "phoneme_language": "en-us",     // depending on your target language, pick one from  https://github.com/bootphon/phonemizer#languages
 
     // MULTI-SPEAKER and GST
+    "use_speaker_encoder_loss": true, // use the speaker encoder to calculate the loss between the expected and predicted spectrogram embedding
+    "speaker_encoder_loss_beta": 2, // default 10.0, the beta defines the importance of the speaker encoder loss in the calculation of the model error. The higher the beta value, the greater the influence of the speaker encoder loss on the final loss of the model
+    "speaker_encoder_config_path":"../../../datasets/training/speaker_encoder/config.json", // config.json for the speaker encoder
+    "speaker_encoder_checkpoint_path": "../../../datasets/training/speaker_encoder/LibriTTS_angleproto/best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,      // use speaker embedding to enable multi-speaker learning.
     "use_external_speaker_embedding_file": false, // if true, forces the model to use external embedding per sample instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
     "external_speaker_embedding_file": "../../speakers-vctk-en.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558

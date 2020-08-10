@@ -47,7 +47,7 @@ class SpeakerEncoder(nn.Module):
 
     def compute_embedding(self, x, num_frames=160, overlap=0.5):
         """
-        Generate embeddings for a batch of utterances
+        Generate embeddings for  of utterances
         x: 1xTxD
         """
         num_overlap = int(num_frames * overlap)
@@ -69,10 +69,18 @@ class SpeakerEncoder(nn.Module):
         Generate embeddings for a batch of utterances
         x: BxTxD
         """
-        num_overlap = num_frames * overlap
+        # ToDo: its works but its not correct Fix me !
+        # We need to give unpad because we cannot pass zeros to 
+        #   the model because in some frames you can divide by zero
+        # cut in the min seq len
+        min_lenght = int(seq_lens.min())
+        x = x[:, :min_lenght, :]
+        seq_lens = torch.zeros(seq_lens.shape).to(x.device)+min_lenght
+
+        num_overlap = int(num_frames * overlap)
         max_len = x.shape[1]
         embed = None
-        num_iters = seq_lens / (num_frames - num_overlap)
+        num_iters = seq_lens.float() / (num_frames - num_overlap)
         cur_iter = 0
         for offset in range(0, max_len, num_frames - num_overlap):
             cur_iter += 1
@@ -84,5 +92,6 @@ class SpeakerEncoder(nn.Module):
                 embed[cur_iter <= num_iters, :] += self.inference(
                     frames[cur_iter <= num_iters, :, :]
                 )
-        return embed / num_iters
+
+        return embed / num_iters.reshape(-1, 1)
 
