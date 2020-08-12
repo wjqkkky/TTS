@@ -596,6 +596,26 @@ def main(args):  # pylint: disable=redefined-outer-name
     num_params = count_parameters(model)
     print("\n > Model has {} parameters".format(num_params), flush=True)
 
+    # Freeze Layers
+    if c.freeze_decoder:
+        for name, param in model.decoder.named_parameters():
+            # ignore stopnet
+            if 'stopnet' in name:
+                continue
+            param.requires_grad = False
+    if c.freeze_encoder:
+        for name, param in model.encoder.named_parameters():
+            param.requires_grad = False
+
+    if c.freeze_postnet:
+        for param in model.postnet.parameters():
+            param.requires_grad = False
+
+    if c.use_gst:
+        if c.freeze_gst:
+            for param in model.gst_layer.parameters():
+                param.requires_grad = False
+
     if 'best_loss' not in locals():
         best_loss = float('inf')
 

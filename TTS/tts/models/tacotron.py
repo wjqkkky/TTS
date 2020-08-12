@@ -33,6 +33,7 @@ class Tacotron(TacotronAbstract):
                  gst_num_heads=4,
                  gst_style_tokens=10,
                  disable_gst=False,
+                 gst_use_speaker_embedding=False,
                  memory_size=5):
         super(Tacotron,
               self).__init__(num_chars, num_speakers, r, postnet_output_dim,
@@ -41,7 +42,7 @@ class Tacotron(TacotronAbstract):
                              forward_attn, trans_agent, forward_attn_mask,
                              location_attn, attn_K, separate_stopnet,
                              bidirectional_decoder, double_decoder_consistency,
-                             ddc_r, gst, gst_embedding_dim, gst_num_heads, gst_style_tokens, disable_gst)
+                             ddc_r, gst, gst_embedding_dim, gst_num_heads, gst_style_tokens, disable_gst, gst_use_speaker_embedding)
 
         # init layer dims
         decoder_in_features = 256
@@ -85,10 +86,11 @@ class Tacotron(TacotronAbstract):
         # global style token layers
         if self.gst:
             self.gst_layer = GST(num_mel=80,
-                                 num_heads=gst_num_heads,
-                                 num_style_tokens=gst_style_tokens,
-                                 embedding_dim=gst_embedding_dim)
-        # backward pass decoder
+                                num_heads=gst_num_heads,
+                                num_style_tokens=gst_style_tokens,
+                                gst_embedding_dim=gst_embedding_dim,
+                                speaker_embedding_dim=speaker_embedding_dim if self.embeddings_per_sample and self.gst_use_speaker_embedding else None)
+
         if self.bidirectional_decoder:
             self._init_backward_decoder()
         # setup DDC
@@ -114,7 +116,13 @@ class Tacotron(TacotronAbstract):
         encoder_outputs = self.encoder(inputs)
         # sequence masking
         encoder_outputs = encoder_outputs * input_mask.unsqueeze(2).expand_as(encoder_outputs)
-        
+
+        if self.gst:
+            # B x gst_dim
+            encoder_outputs = self.compute_gst(encoder_outputs, 
+                                                mel_specs if not self.disable_gst else None, # if not disable gst pass wav reference
+                                                speaker_embeddings if self.gst_use_speaker_embedding else None)
+
         # global style token
         if self.gst:
             # B x gst_dim
@@ -161,12 +169,12 @@ class Tacotron(TacotronAbstract):
     def inference(self, characters, speaker_ids=None, style_mel=None, speaker_embeddings=None):
         inputs = self.embedding(characters)
         encoder_outputs = self.encoder(inputs)
+
         if self.gst:
             # B x gst_dim
-            if self.disable_gst:
-                 encoder_outputs = self.compute_gst(encoder_outputs, None)
-            else:
-                encoder_outputs = self.compute_gst(encoder_outputs, style_mel)
+            encoder_outputs = self.compute_gst(encoder_outputs,
+                                                style_mel if not self.disable_gst else None, # if not disable gst pass wav reference
+                                                speaker_embeddings if self.gst_use_speaker_embedding else None)
 
         if self.num_speakers > 1:
             if not self.embeddings_per_sample:

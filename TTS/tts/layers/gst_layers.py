@@ -8,14 +8,17 @@ class GST(nn.Module):
 
     See https://arxiv.org/pdf/1803.09017"""
 
-    def __init__(self, num_mel, num_heads, num_style_tokens, embedding_dim):
+    def __init__(self, num_mel, num_heads, num_style_tokens, gst_embedding_dim, speaker_embedding_dim=None):
         super().__init__()
-        self.encoder = ReferenceEncoder(num_mel, embedding_dim)
+        self.encoder = ReferenceEncoder(num_mel, gst_embedding_dim)
         self.style_token_layer = StyleTokenLayer(num_heads, num_style_tokens,
-                                                 embedding_dim)
+                                                 gst_embedding_dim, speaker_embedding_dim)
 
-    def forward(self, inputs):
+    def forward(self, inputs, speaker_embedding=None):
         enc_out = self.encoder(inputs)
+        # concat speaker_embedding
+        if speaker_embedding is not None:
+            enc_out = torch.cat([enc_out, speaker_embedding], dim=-1)
         style_embed = self.style_token_layer(enc_out)
 
         return style_embed
@@ -90,9 +93,14 @@ class StyleTokenLayer(nn.Module):
     """NN Module attending to style tokens based on prosody encodings."""
 
     def __init__(self, num_heads, num_style_tokens,
-                 embedding_dim):
+                 embedding_dim, speaker_embedding_dim=None):
         super().__init__()
+
         self.query_dim = embedding_dim // 2
+
+        if speaker_embedding_dim:
+            self.query_dim += speaker_embedding_dim
+
         self.key_dim = embedding_dim // num_heads
         self.style_tokens = nn.Parameter(
             torch.FloatTensor(num_style_tokens, self.key_dim))
