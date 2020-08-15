@@ -174,7 +174,7 @@ class TacotronAbstract(ABC, nn.Module):
         if isinstance(style_input, dict):
             query = torch.zeros(1, 1, self.gst_embedding_dim//2).to(device)
             if speaker_embedding is not None:
-                query = torch.cat([query, speaker_embedding], dim=-1)
+                query = torch.cat([query, speaker_embedding.reshape(1, 1, -1)], dim=-1)
 
             _GST = torch.tanh(self.gst_layer.style_token_layer.style_tokens)
             gst_outputs = torch.zeros(1, 1, self.gst_embedding_dim).to(device)

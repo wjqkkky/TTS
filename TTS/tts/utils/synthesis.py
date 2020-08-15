@@ -39,7 +39,7 @@ def numpy_to_tf(np_array, dtype):
 
 def compute_style_mel(style_wav, ap, cuda=False):
     style_mel = torch.FloatTensor(ap.melspectrogram(
-        ap.load_wav(style_wav, sr=ap.sample_rate))).unsqueeze(0)
+        np.asarray(ap.load_wav(style_wav, sr=ap.sample_rate), dtype=np.float32)).astype('float32')).unsqueeze(0)
     if cuda:
         return style_mel.cuda()
     return style_mel
