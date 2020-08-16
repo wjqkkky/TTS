@@ -11,6 +11,7 @@ import traceback
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from random import randrange
 from TTS.tts.datasets.preprocess import load_meta_data
 from TTS.tts.datasets.TTSDataset import MyDataset
 from TTS.tts.layers.losses import TacotronLoss
@@ -418,8 +419,16 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
         test_audios = {}
         test_figures = {}
         print(" | > Synthesizing test sentences")
-        speaker_id = 0 if c.use_speaker_embedding else None
+        speaker_id = 0 if c.use_speaker_embedding and not c.use_external_speaker_embedding_file else None
+        speaker_embedding = speaker_mapping[list(speaker_mapping.keys())[randrange(len(speaker_mapping)-1)]]['embedding'] if c.use_external_speaker_embedding_file and c.use_speaker_embedding else None
         style_wav = c.get("gst_style_input")
+        if style_wav is None and c.use_gst:
+            # inicialize GST with zero dict. 
+            style_wav = {}
+            print("WARNING: You don't provided a gst style wav, for this reason we use a zero tensor!")
+            for i in range(c.gst['gst_style_tokens']):
+                style_wav[str(i)] = 0
+
         for idx, test_sentence in enumerate(test_sentences):
             try:
                 wav, alignment, decoder_output, postnet_output, stop_tokens, inputs = synthesis(
@@ -429,6 +438,7 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
                     use_cuda,
                     ap,
                     speaker_id=speaker_id,
+                    speaker_embedding=speaker_embedding,
                     style_wav=style_wav,
                     truncated=False,
                     enable_eos_bos_chars=c.enable_eos_bos_chars, #pylint: disable=unused-argument
