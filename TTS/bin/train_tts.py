@@ -491,15 +491,14 @@ def main(args):  # pylint: disable=redefined-outer-name
     # parse speakers
     if c.use_speaker_embedding:
         speakers = get_speakers(meta_data_train)
+
         if args.restore_path:
             if c.use_external_speaker_embedding_file: # if restore checkpoint and use External Embedding file
                 prev_out_path = os.path.dirname(args.restore_path)
-                speaker_mapping = load_speaker_mapping(prev_out_path)
+                #speaker_mapping = load_speaker_mapping(prev_out_path)
+                speaker_mapping = load_speaker_mapping(c.external_speaker_embedding_file)
                 if not speaker_mapping:
-                    print("WARNING: speakers.json was not found in restore_path, trying to use CONFIG.external_speaker_embedding_file")
-                    speaker_mapping = load_speaker_mapping(c.external_speaker_embedding_file)
-                    if not speaker_mapping:
-                        raise RuntimeError("You must copy the file speakers.json to restore_path, or set a valid file in CONFIG.external_speaker_embedding_file")
+                    raise RuntimeError("You must copy the file speakers.json to restore_path, or set a valid file in CONFIG.external_speaker_embedding_file")
                 speaker_embedding_dim = len(speaker_mapping[list(speaker_mapping.keys())[0]]['embedding'])
             elif not c.use_external_speaker_embedding_file: # if restore checkpoint and don't use External Embedding file
                 prev_out_path = os.path.dirname(args.restore_path)
@@ -519,8 +518,11 @@ def main(args):  # pylint: disable=redefined-outer-name
             speaker_embedding_dim = None
         save_speaker_mapping(OUT_PATH, speaker_mapping)
         num_speakers = len(speaker_mapping)
-        print("Training with {} speakers: {}".format(num_speakers,
+        print("Training with {} speakers: {}".format(len(speakers),
                                                      ", ".join(speakers)))
+        eval_speakers = get_speakers(meta_data_eval)
+        print("Evaluate with {} speakers: {}".format(len(eval_speakers),
+                                                     ", ".join(eval_speakers)))
     else:
         num_speakers = 0
         speaker_embedding_dim = None
