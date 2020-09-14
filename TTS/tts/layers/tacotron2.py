@@ -102,7 +102,7 @@ class Encoder(nn.Module):
         o = o.transpose(1, 2)
         o = nn.utils.rnn.pack_padded_sequence(o,
                                               input_lengths,
-                                              batch_first=True)
+                                              batch_first=True, enforce_sorted=False)
         self.lstm.flatten_parameters()
         o, _ = self.lstm(o)
         o, _ = nn.utils.rnn.pad_packed_sequence(o, batch_first=True)

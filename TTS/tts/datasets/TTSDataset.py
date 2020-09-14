@@ -25,6 +25,9 @@ class MyDataset(Dataset):
                  phoneme_language="en-us",
                  enable_eos_bos=False,
                  speaker_mapping=None,
+                 c=None,
+                 da_speaker_mapping=None,
+                 loss_speaker_mapping=None,
                  verbose=False):
         """
         Args:
@@ -60,6 +63,13 @@ class MyDataset(Dataset):
         self.phoneme_language = phoneme_language
         self.enable_eos_bos = enable_eos_bos
         self.speaker_mapping = speaker_mapping
+        self.c = c
+        self.da_speaker_mapping = da_speaker_mapping
+        self.num_no_real_samples = None if da_speaker_mapping is None else c.batch_size-c.data_aumentation_num_real_samples 
+        self.da_speaker_mapping_keys = None if da_speaker_mapping is None else list(da_speaker_mapping.keys())
+
+        self.loss_speaker_mapping = loss_speaker_mapping
+
         self.verbose = verbose
         if use_phonemes and not os.path.isdir(phoneme_cache_path):
             os.makedirs(phoneme_cache_path, exist_ok=True)
@@ -200,9 +210,25 @@ class MyDataset(Dataset):
             # get speaker embeddings
             if self.speaker_mapping  is not None:
                 wav_files_names = [batch[idx]['wav_file_name'] for idx in ids_sorted_decreasing]
-                speaker_embedding = [self.speaker_mapping[w]['embedding'] for w in wav_files_names]
+                speaker_embedding = []
+                loss_speaker_embedding = [] if self.c.use_diferent_speaker_mapping_for_loss_speaker_encoder else None
+                for w in wav_files_names:
+                    speaker_embedding.append(self.speaker_mapping[w]['embedding'])
+                    if self.c.use_diferent_speaker_mapping_for_loss_speaker_encoder:
+                        loss_speaker_embedding.append(self.loss_speaker_mapping[w]['embedding'])
+
+                if self.c.use_data_aumentation_speakers:
+                    da_speaker_embedding = []
+                    for _ in range(self.num_no_real_samples):
+                        w = random.choice(self.da_speaker_mapping_keys)
+                        da_speaker_embedding.append(self.da_speaker_mapping[w]['embedding'])
+                        if self.c.use_diferent_speaker_mapping_for_loss_speaker_encoder:
+                            loss_speaker_embedding.append(self.loss_speaker_mapping[w]['embedding'])
+                else:
+                    da_speaker_embedding = None
             else:
                 speaker_embedding = None
+                da_speaker_embedding = None
             # compute features
             mel = [self.ap.melspectrogram(w).astype('float32') for w in wav]
 
@@ -236,6 +262,9 @@ class MyDataset(Dataset):
             if speaker_embedding is not None:
                 speaker_embedding = torch.FloatTensor(speaker_embedding)
 
+            if loss_speaker_embedding is not None:
+                loss_speaker_embedding = torch.FloatTensor(loss_speaker_embedding)
+
             # compute linear spectrogram
             if self.compute_linear_spec:
                 linear = [self.ap.spectrogram(w).astype('float32') for w in wav]
@@ -245,8 +274,21 @@ class MyDataset(Dataset):
                 linear = torch.FloatTensor(linear).contiguous()
             else:
                 linear = None
+            if self.num_no_real_samples is not None and speaker_embedding is not None:
+                num_rep = int(self.c.batch_size/self.c.data_aumentation_num_real_samples)
+                # repeat tensors
+                text = text.repeat([num_rep] + [1]*(len(text.shape)-1))
+                text_lenghts = text_lenghts.repeat([num_rep] + [1]*(len(text_lenghts.shape)-1))
+                if linear is not None:
+                    linear = linear.repeat([num_rep] + [1]*(len(linear.shape)-1))
+                mel = mel.repeat([num_rep] + [1]*(len(mel.shape)-1))
+                mel_lengths = mel_lengths.repeat([num_rep] + [1]*(len(mel_lengths.shape)-1))
+                stop_targets = stop_targets.repeat([num_rep] + [1]*(len(stop_targets.shape)-1))
+                # cat embedding tensor
+                da_speaker_embedding = torch.FloatTensor(da_speaker_embedding)
+                speaker_embedding = torch.cat((speaker_embedding, da_speaker_embedding), dim=0)
             return text, text_lenghts, speaker_name, linear, mel, mel_lengths, \
-                   stop_targets, item_idxs, speaker_embedding
+                   stop_targets, item_idxs, speaker_embedding, loss_speaker_embedding
 
         raise TypeError(("batch must contain tensors, numbers, dicts or lists;\
                          found {}".format(type(batch[0]))))

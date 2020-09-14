@@ -48,10 +48,15 @@ MODEL_PATH = MODEL_RUN_PATH + "best_model.pth.tar"
 CONFIG_PATH = MODEL_RUN_PATH + "config.json"
 
 
-DATASETS_NAME = ['vctk'] # list the datasets
-DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/']
-DATASETS_METAFILE = ['']
+DATASETS_NAME = ['vctk', 'brspeech', 'brspeech'] # list the datasets
+DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
 
+DATASETS_METAFILE = ['', 'train_TTS-Portuguese_Corpus_metadata.csv','test_TTS-Portuguese_Corpus_metadata.csv']
+
+#DATASETS_NAME = ['brspeech'] # list the datasets
+#DATASETS_PATH = ['../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
+
+#DATASETS_METAFILE = ['test_TTS-Portuguese_Corpus_metadata.csv']
 USE_CUDA = True
 
 

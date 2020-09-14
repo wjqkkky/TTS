@@ -94,9 +94,14 @@ SAVE_PATH = '../'
 
 
 # Set constants
-DATASETS_NAME = ['vctk','libri_tts', 'libri_tts', 'libri_tts', ] # list the datasets
-DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/', '../../../../datasets/LibriTTS/LibriTTS/dataset/', '../../../../datasets/LibriTTS/test/LibriTTS/test-other/', '../../../../datasets/LibriTTS/test/LibriTTS/test-clean/']
-DATASETS_METAFILE = ['', None, None, None]
+#DATASETS_NAME = ['vctk','libri_tts', 'libri_tts', 'libri_tts', ] # list the datasets
+#DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/', '../../../../datasets/LibriTTS/LibriTTS/dataset/', '../../../../datasets/LibriTTS/test/LibriTTS/test-other/', '../../../../datasets/LibriTTS/test/LibriTTS/test-clean/']
+#DATASETS_METAFILE = ['', None, None, None]
+DATASETS_NAME = ['vctk', 'brspeech', 'brspeech'] # list the datasets
+DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
+
+DATASETS_METAFILE = ['', 'train_TTS-Portuguese_Corpus_metadata.csv','test_TTS-Portuguese_Corpus_metadata.csv']
+
 USE_CUDA = True
 
 
