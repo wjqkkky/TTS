@@ -640,6 +640,14 @@ def main(args):  # pylint: disable=redefined-outer-name
     num_params = count_parameters(model)
     print("\n > Model has {} parameters".format(num_params), flush=True)
 
+    if c.freeze_prenet:
+        for name, param in model.decoder.named_parameters():
+            # ignore stopnet
+            if 'prenet' in name:
+                print(name)
+                param.requires_grad = False
+        
+
     # Freeze Layers
     if c.freeze_decoder:
         for name, param in model.decoder.named_parameters():
