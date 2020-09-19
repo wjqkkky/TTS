@@ -147,8 +147,10 @@
     "diferent_speaker_mapping_for_speaker_loss_encoder_file": "../../speakers-vctk-en.json", // speakers.jsonm for data aumentation 
 
     // freeze layers 
+    "freeze_encoder": false,
     "freeze_prenet": false, // if your freeze decoder  its freeze prenet too, this param is util for you freeze prenet and not freeze all decoder.
     "freeze_decoder": false,
+    "no_freeze_attn": false, // if true during decoder freeze, dont freeze attention layers
     "freeze_postnet": false,
     "freeze_gst": false,
 

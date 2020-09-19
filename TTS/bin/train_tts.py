@@ -646,11 +646,14 @@ def main(args):  # pylint: disable=redefined-outer-name
             if 'prenet' in name:
                 print(name)
                 param.requires_grad = False
-        
 
     # Freeze Layers
     if c.freeze_decoder:
         for name, param in model.decoder.named_parameters():
+            # ignore attention layers
+            if c.no_freeze_attn:
+                if 'attention' in name:
+                    continue
             # ignore stopnet
             if 'stopnet' in name:
                 continue
