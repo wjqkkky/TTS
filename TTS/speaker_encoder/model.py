@@ -51,7 +51,7 @@ class SpeakerEncoder(nn.Module):
         x: 1xTxD
         """
         if model_sr and spec_sr and model_sr != spec_sr:
-            scale_factor= (1, model_sr/spec_sr, 1) 
+            scale_factor = (1, model_sr/spec_sr, 1) 
             # print(scale_factor)
             x = torch.nn.functional.interpolate(x.unsqueeze(0), scale_factor=scale_factor, mode='bilinear').squeeze(0)
 
