@@ -16,15 +16,33 @@ class LSTMWithProjection(nn.Module):
         o, (_, _) = self.lstm(x)
         return self.linear(o)
 
+class LSTMWithoutProjection(nn.Module):
+    def __init__(self, input_dim, lstm_dim, proj_dim, num_lstm_layers):
+        super().__init__()
+        self.lstm = nn.LSTM(input_size=input_dim,
+                            hidden_size=lstm_dim, 
+                            num_layers=num_lstm_layers, 
+                            batch_first=True)
+        self.linear = nn.Linear(lstm_dim, proj_dim, bias=True)
+        self.relu = nn.ReLU()
+    def forward(self, x):
+        _, (hidden, _) = self.lstm(x)
+        return self.relu(self.linear(hidden[-1]))
 
 class SpeakerEncoder(nn.Module):
-    def __init__(self, input_dim, proj_dim=256, lstm_dim=768, num_lstm_layers=3):
+    def __init__(self, input_dim, proj_dim=256, lstm_dim=768, num_lstm_layers=3, use_lstm_with_projection=True):
         super().__init__()
+        self.use_lstm_with_projection = use_lstm_with_projection
         layers = []
-        layers.append(LSTMWithProjection(input_dim, lstm_dim, proj_dim))
-        for _ in range(num_lstm_layers - 1):
-            layers.append(LSTMWithProjection(proj_dim, lstm_dim, proj_dim))
-        self.layers = nn.Sequential(*layers)
+        # choise LSTM layer
+        if use_lstm_with_projection:
+            layers.append(LSTMWithProjection(input_dim, lstm_dim, proj_dim))
+            for _ in range(num_lstm_layers - 1):
+                layers.append(LSTMWithProjection(proj_dim, lstm_dim, proj_dim))
+            self.layers = nn.Sequential(*layers)
+        else:
+            self.layers = LSTMWithoutProjection(input_dim, lstm_dim, proj_dim, num_lstm_layers)
+
         self._init_layers()
 
     def _init_layers(self):
@@ -37,12 +55,18 @@ class SpeakerEncoder(nn.Module):
     def forward(self, x):
         # TODO: implement state passing for lstms
         d = self.layers(x)
-        d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
+        if self.use_lstm_with_projection:
+            d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
+        else:
+            d = torch.nn.functional.normalize(d, p=2, dim=1)
         return d
 
     def inference(self, x):
         d = self.layers.forward(x)
-        d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
+        if self.use_lstm_with_projection:
+            d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
+        else:
+            d = torch.nn.functional.normalize(d, p=2, dim=1)
         return d
 
     def compute_embedding(self, x, num_frames=160, overlap=0.5, model_sr=None, spec_sr=None):
@@ -74,18 +98,10 @@ class SpeakerEncoder(nn.Module):
         Generate embeddings for a batch of utterances
         x: BxTxD
         """
-        # ToDo: its works but its not correct Fix me !
-        # We need to give unpad because we cannot pass zeros to 
-        #   the model because in some frames you can divide by zero
-        # cut in the min seq len
-        min_lenght = int(seq_lens.min())
-        x = x[:, :min_lenght, :]
-        seq_lens = torch.zeros(seq_lens.shape).to(x.device)+min_lenght
-
-        num_overlap = int(num_frames * overlap)
+        num_overlap = num_frames * overlap
         max_len = x.shape[1]
         embed = None
-        num_iters = seq_lens.float() / (num_frames - num_overlap)
+        num_iters = seq_lens / (num_frames - num_overlap)
         cur_iter = 0
         for offset in range(0, max_len, num_frames - num_overlap):
             cur_iter += 1
@@ -97,6 +113,4 @@ class SpeakerEncoder(nn.Module):
                 embed[cur_iter <= num_iters, :] += self.inference(
                     frames[cur_iter <= num_iters, :, :]
                 )
-
-        return embed / num_iters.reshape(-1, 1)
-
+        return embed / num_iters
