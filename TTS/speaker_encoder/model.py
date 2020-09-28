@@ -75,11 +75,8 @@ class SpeakerEncoder(nn.Module):
         x: 1xTxD
         """
         if model_sr and spec_sr and model_sr != spec_sr:
-            print(model_sr, spec_sr)
-            print(x.shape)
-            scale_factor = (1, model_sr/spec_sr, 1) 
-            # print(scale_factor)
-            x = torch.nn.functional.interpolate(x.unsqueeze(0).unsqueeze(0), scale_factor=scale_factor, mode='bilinear').squeeze(0).squeeze(0)
+            scale_factor = (model_sr/spec_sr, 1)
+            x = torch.nn.functional.interpolate(x.unsqueeze(0), scale_factor=scale_factor, mode='bilinear').squeeze(0)
 
         num_overlap = int(num_frames * overlap)
         max_len = x.shape[1]
