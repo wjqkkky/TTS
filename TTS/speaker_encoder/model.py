@@ -45,11 +45,16 @@ class SpeakerEncoder(nn.Module):
         d = torch.nn.functional.normalize(d[:, -1], p=2, dim=1)
         return d
 
-    def compute_embedding(self, x, num_frames=160, overlap=0.5):
+    def compute_embedding(self, x, num_frames=160, overlap=0.5, model_sr=None, spec_sr=None):
         """
         Generate embeddings for  of utterances
         x: 1xTxD
         """
+        if model_sr and spec_sr and model_sr != spec_sr:
+            scale_factor= (1, model_sr/spec_sr, 1) 
+            # print(scale_factor)
+            x = torch.nn.functional.interpolate(x.unsqueeze(0), scale_factor=scale_factor, mode='bilinear').squeeze(0)
+
         num_overlap = int(num_frames * overlap)
         max_len = x.shape[1]
         embed = None
