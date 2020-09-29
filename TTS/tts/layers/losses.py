@@ -161,10 +161,13 @@ class GuidedAttentionLoss(torch.nn.Module):
         return out_masks.unsqueeze(-1) & in_masks.unsqueeze(-2)
 
 class SpeakerEncoderLoss(torch.nn.Module):
-    def __init__(self, c, beta=1):
+    def __init__(self, c, beta=1, SE_samplerate=None, TTS_samplerate=None):
         super(SpeakerEncoderLoss, self).__init__()
         self.beta = beta
         self.config = c
+        self.SE_samplerate = SE_samplerate
+        self.TTS_samplerate = TTS_samplerate
+        print(self.SE_samplerate, self.TTS_samplerate)
         #self.criterion = nn.MSELoss()
     def Lcycle(self, input_speaker_embeddings, output_speaker_embeddings):
         ''' 
@@ -182,8 +185,8 @@ class SpeakerEncoderLoss(torch.nn.Module):
         for i in range(output_lens.size(0)):
             # remove the zero padding and compute speaker embedding
             if not self.config.use_data_aumentation_speakers:
-                inp_emb = speaker_encoder_model.compute_embedding(mel_input[i][:output_lens[i], :].unsqueeze(0))
-            out_emb = speaker_encoder_model.compute_embedding(decoder_output[i][:output_lens[i], :].unsqueeze(0))
+                inp_emb = speaker_encoder_model.compute_embedding(mel_input[i][:output_lens[i], :].unsqueeze(0), model_sr=self.SE_samplerate, spec_sr=self.TTS_samplerate)
+            out_emb = speaker_encoder_model.compute_embedding(decoder_output[i][:output_lens[i], :].unsqueeze(0), model_sr=self.SE_samplerate, spec_sr=self.TTS_samplerate)
             # append in a list
             if not self.config.use_data_aumentation_speakers:
                 inp_se_list.append(inp_emb)
@@ -198,13 +201,14 @@ class SpeakerEncoderLoss(torch.nn.Module):
         return self.beta * self.Lcycle(input_speaker_embeddings, output_speaker_embeddings)
 
 class TacotronLoss(torch.nn.Module):
-    def __init__(self, c, stopnet_pos_weight=10, ga_sigma=0.4, speaker_encoder_model=None):
+    def __init__(self, c, stopnet_pos_weight=10, ga_sigma=0.4, speaker_encoder_model=None, SE_samplerate=None, TTS_samplerate=None):
         super(TacotronLoss, self).__init__()
         self.stopnet_pos_weight = stopnet_pos_weight
         self.ga_alpha = c.ga_alpha
         self.config = c
         self.speaker_encoder_model = speaker_encoder_model
         self.num_real_samples = c.data_aumentation_num_real_samples
+
         # postnet decoder loss
         if c.loss_masking:
             self.criterion = L1LossMasked(c.seq_len_norm) if c.model in [
@@ -221,7 +225,7 @@ class TacotronLoss(torch.nn.Module):
         self.criterion_st = BCELossMasked(pos_weight=torch.tensor(stopnet_pos_weight)) if c.stopnet else None
 
         if c.use_speaker_encoder_loss:
-            self.criterion_se = SpeakerEncoderLoss(c=c, beta=c.speaker_encoder_loss_beta)
+            self.criterion_se = SpeakerEncoderLoss(c=c, beta=c.speaker_encoder_loss_beta, SE_samplerate=SE_samplerate, TTS_samplerate=TTS_samplerate)
 
     def forward(self, postnet_output, decoder_output, mel_input, linear_input,
                 stopnet_output, stopnet_target, output_lens, decoder_b_output,
@@ -324,4 +328,3 @@ class TacotronLoss(torch.nn.Module):
 
         return_dict['loss'] = loss
         return return_dict
-

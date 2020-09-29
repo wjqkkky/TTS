@@ -133,6 +133,7 @@
     // MULTI-SPEAKER and GST
     "use_speaker_encoder_loss": true, // use the speaker encoder to calculate the loss between the expected and predicted spectrogram embedding
     "speaker_encoder_loss_beta": 10, // default 10.0, the beta defines the importance of the speaker encoder loss in the calculation of the model error. The higher the beta value, the greater the influence of the speaker encoder loss on the final loss of the model
+    
     "speaker_encoder_config_path":"../../../datasets/training/speaker_encoder/LibriTTS_angleproto/config.json", // config.json for the speaker encoder
     "speaker_encoder_checkpoint_path": "../../../datasets/training/speaker_encoder/LibriTTS_angleproto/best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,      // use speaker embedding to enable multi-speaker learning.

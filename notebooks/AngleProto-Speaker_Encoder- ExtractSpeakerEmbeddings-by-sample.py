@@ -43,8 +43,8 @@ from TTS.utils.io import load_config
 # In[ ]:
 
 
-MODEL_RUN_PATH = "../../../../datasets/training/speaker_encoder/LibriTTS_angleproto/"
-MODEL_PATH = MODEL_RUN_PATH + "best_model.pth.tar"
+MODEL_RUN_PATH = "../../../../datasets/training/speaker_encoder/LibriTTS-common-voice-voxceleb_angle_proto/"
+MODEL_PATH = MODEL_RUN_PATH + "320k.pth.tar"
 CONFIG_PATH = MODEL_RUN_PATH + "config.json"
 
 
@@ -74,11 +74,15 @@ meta_data= list(meta_data)
 
 
 # In[ ]:
-
-
 c = load_config(CONFIG_PATH)
 ap = AudioProcessor(**c['audio'])
 
+
+TTS_sample_rate = 22050
+SE_sample_rate = ap.sample_rate
+
+ap.sample_rate = TTS_sample_rate
+print(SE_sample_rate, TTS_sample_rate)
 model = SpeakerEncoder(**c.model)
 model.load_state_dict(torch.load(MODEL_PATH)['model'])
 model.eval()
@@ -91,11 +95,11 @@ len_meta_data = len(meta_data)
 for i in tqdm(range(len_meta_data)):
     _, wav_file, speaker_id = meta_data[i]
     wav_file_name = os.path.basename(wav_file)
-    mel_spec = ap.melspectrogram(ap.load_wav(wav_file, sr=ap.sample_rate)).T
+    mel_spec = ap.melspectrogram(ap.load_wav(wav_file, sr=TTS_sample_rate)).T
     mel_spec = torch.FloatTensor(mel_spec[None, :, :])
     if USE_CUDA:
         mel_spec = mel_spec.cuda()
-    embedd = model.compute_embedding(mel_spec).cpu().detach().numpy().reshape(-1)
+    embedd = model.compute_embedding(mel_spec, model_sr=SE_sample_rate, spec_sr=TTS_sample_rate).cpu().detach().numpy().reshape(-1)
     embeddings_dict[wav_file_name] = [embedd, speaker_id]
 
 

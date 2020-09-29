@@ -564,7 +564,18 @@ def main(args):  # pylint: disable=redefined-outer-name
     # load speaker encoder for use 
     if c.use_speaker_encoder_loss:
         speaker_encoder_c = load_config(c.speaker_encoder_config_path)
-        if set(c.audio) != set(speaker_encoder_c.audio):
+        se_conf_audio = speaker_encoder_c.audio
+        tts_conf_audio = c.audio
+
+        if se_conf_audio['sample_rate'] != tts_conf_audio['sample_rate']:
+            print("Using interpolation for resample spectogram")
+            SE_samplerate = se_conf_audio['sample_rate']
+            TTS_samplerate = tts_conf_audio['sample_rate']
+            se_conf_audio['sample_rate'] = tts_conf_audio['sample_rate']
+        else:
+            SE_samplerate = None
+            TTS_samplerate = None
+        if set(se_conf_audio) != set(tts_conf_audio):
             '''for key in c.audio.keys():
                 print(key, c.audio[key] == speaker_encoder_c.audio[key])'''
             print("TTS Config:\n",c.audio,"\nSpeaker Encoder Config:\n", speaker_encoder_c.audio)
@@ -584,6 +595,8 @@ def main(args):  # pylint: disable=redefined-outer-name
         speaker_encoder_model.eval()
     else:
         speaker_encoder_model = None
+        SE_samplerate = None
+        TTS_samplerate = None
 
     params = set_weight_decay(model, c.wd)
     optimizer = RAdam(params, lr=c.lr, weight_decay=0)
@@ -595,7 +608,7 @@ def main(args):  # pylint: disable=redefined-outer-name
         optimizer_st = None
 
     # setup criterion
-    criterion = TacotronLoss(c, stopnet_pos_weight=10.0, ga_sigma=0.4, speaker_encoder_model=speaker_encoder_model)
+    criterion = TacotronLoss(c, stopnet_pos_weight=10.0, ga_sigma=0.4, speaker_encoder_model=speaker_encoder_model, SE_samplerate=SE_samplerate, TTS_samplerate=TTS_samplerate)
 
     if args.restore_path:
         checkpoint = torch.load(args.restore_path, map_location='cpu')
@@ -686,7 +699,7 @@ def main(args):  # pylint: disable=redefined-outer-name
             if c.bidirectional_decoder:
                 model.decoder_backward.set_r(r)
             print("\n > Number of output frames:", model.decoder.r)
-        #eval_avg_loss_dict = evaluate(model, criterion, ap, global_step, epoch, speaker_mapping, da_speaker_mapping, loss_speaker_mapping)
+        # eval_avg_loss_dict = evaluate(model, criterion, ap, global_step, epoch, speaker_mapping, da_speaker_mapping, loss_speaker_mapping)
         train_avg_loss_dict, global_step = train(model, criterion, optimizer,
                                                  optimizer_st, scheduler, ap,
                                                  global_step, epoch, speaker_mapping, da_speaker_mapping, loss_speaker_mapping)

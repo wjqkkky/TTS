@@ -1,0 +1,185 @@
+2020-09-29 11:57:07.887675: W tensorflow/stream_executor/platform/default/dso_loader.cc:59] Could not load dynamic library 'libcudart.so.10.1'; dlerror: libcudart.so.10.1: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: :/usr/local/cuda-9.0/lib64:/usr/local/cuda-9.0/extras/CUPTI/lib64
+2020-09-29 11:57:07.887700: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+ > Using CUDA:  True
+ > Number of GPUs:  1
+ > Git Hash: 52cd510
+ > Experiment folder: ../../Mozilla-TTS/PT/new-SE/vctk-jia-et-al-with-DDC-GST-with-CorentinJ-speakerEncoder-gst-large-with-speaker-embedding-se-loss-test-data-aumentation-mean-fake-mean-real/vctk-jia-2018-per-sample-with-GST-CorentinJ-DDC-speaker-Encoder-gst-large-with-speaker-embedding-se-loss-data-aumentation-freeze-decoder-mean-fake-mean-real-NEW-SE-September-29-2020_11+57AM-52cd510
+ > Setting up Audio Processor...
+ | > sample_rate:22050
+ | > num_mels:80
+ | > min_level_db:-100
+ | > frame_shift_ms:None
+ | > frame_length_ms:None
+ | > ref_level_db:20
+ | > fft_size:1024
+ | > power:1.5
+ | > preemphasis:0.98
+ | > griffin_lim_iters:60
+ | > signal_norm:True
+ | > symmetric_norm:True
+ | > mel_fmin:0
+ | > mel_fmax:8000.0
+ | > spec_gain:20.0
+ | > stft_pad_mode:reflect
+ | > max_norm:4.0
+ | > clip_norm:True
+ | > do_trim_silence:False
+ | > trim_db:60
+ | > do_sound_norm:False
+ | > stats_path:None
+ | > hop_length:256
+ | > win_length:1024
+Training with 1 speakers: ED
+
+Evaluate with 1 speakers: ED
+
+ > Using model: Tacotron2
+Using interpolation for resample spectogram
+
+ > Speaker Encoder has 9504768 parameters 
+
+16000 22050
+ > Model restored from step 541463
+
+ > Model has 55134900 parameters
+
+[4m[1m > EPOCH: 0/1000[0m
+
+ > Number of output frames: 1
+[1m > EVALUATION [0m
+
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e500000aea'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e000000aea'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e300000aec'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e400000aee'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e600000aed'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e100000aeb'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503e200000aef'
+Traceback (most recent call last):
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 277, in _run_finalizers
+    finalizer()
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 201, in __call__
+    res = self._callback(*self._args, **self._kwargs)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/multiprocessing/util.py", line 110, in _remove_temp_dir
+    rmtree(tempdir)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 494, in rmtree
+    _rmtree_safe_fd(fd, path, onerror)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 452, in _rmtree_safe_fd
+    onerror(os.unlink, fullname, sys.exc_info())
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/shutil.py", line 450, in _rmtree_safe_fd
+    os.unlink(entry.name, dir_fd=topfd)
+OSError: [Errno 16] Device or resource busy: '.nfs00000000080503df00000af0'
+/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/site-packages/torch/nn/functional.py:2506: UserWarning: Default upsampling behavior when mode=bilinear is changed to align_corners=False since 0.4.0. Please specify align_corners=True if the old behavior is desired. See the documentation of nn.Upsample for details.
+  "See the documentation of nn.Upsample for details.".format(mode))
+Traceback (most recent call last):
+  File "TTS/bin/train_tts.py", line 790, in <module>
+    main(args)
+  File "TTS/bin/train_tts.py", line 702, in main
+    eval_avg_loss_dict = evaluate(model, criterion, ap, global_step, epoch, speaker_mapping, da_speaker_mapping, loss_speaker_mapping)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/site-packages/torch/autograd/grad_mode.py", line 49, in decorate_no_grad
+    return func(*args, **kwargs)
+  File "TTS/bin/train_tts.py", line 338, in evaluate
+    text_input, text_lengths, mel_input, speaker_ids=speaker_ids, speaker_embeddings=speaker_embeddings)
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/site-packages/torch/nn/modules/module.py", line 532, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/store/ecasanova/voice-cloning/mozilla/TTS-new/TTS/tts/models/tacotron2.py", line 120, in forward
+    speaker_embeddings if self.gst_use_speaker_embedding else None)
+  File "/store/ecasanova/voice-cloning/mozilla/TTS-new/TTS/tts/models/tacotron_abstract.py", line 188, in compute_gst
+    gst_outputs = self.gst_layer(style_input, speaker_embedding) # pylint: disable=not-callable
+  File "/store/ecasanova/anaconda3/envs/TTS/lib/python3.7/site-packages/torch/nn/modules/module.py", line 532, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/store/ecasanova/voice-cloning/mozilla/TTS-new/TTS/tts/layers/gst_layers.py", line 21, in forward
+    enc_out = torch.cat([enc_out, speaker_embedding], dim=-1)
+RuntimeError: invalid argument 0: Sizes of tensors must match except in dimension 1. Got 4 and 2 in dimension 0 at /pytorch/aten/src/THC/generic/THCTensorMath.cu:71
+ ! Run is removed from ../../Mozilla-TTS/PT/new-SE/vctk-jia-et-al-with-DDC-GST-with-CorentinJ-speakerEncoder-gst-large-with-speaker-embedding-se-loss-test-data-aumentation-mean-fake-mean-real/vctk-jia-2018-per-sample-with-GST-CorentinJ-DDC-speaker-Encoder-gst-large-with-speaker-embedding-se-loss-data-aumentation-freeze-decoder-mean-fake-mean-real-NEW-SE-September-29-2020_11+57AM-52cd510

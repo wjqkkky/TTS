@@ -287,6 +287,8 @@ class MyDataset(Dataset):
                 # cat embedding tensor
                 da_speaker_embedding = torch.FloatTensor(da_speaker_embedding)
                 speaker_embedding = torch.cat((speaker_embedding, da_speaker_embedding), dim=0)
+                speaker_embedding = speaker_embedding[:mel.size(0)]
+
             return text, text_lenghts, speaker_name, linear, mel, mel_lengths, \
                    stop_targets, item_idxs, speaker_embedding, loss_speaker_embedding
 
