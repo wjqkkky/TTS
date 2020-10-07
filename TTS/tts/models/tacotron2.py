@@ -33,7 +33,8 @@ class Tacotron2(TacotronAbstract):
                  gst_num_heads=4,
                  gst_style_tokens=10,
                  disable_gst=False,
-                 gst_use_speaker_embedding=False):
+                 gst_use_speaker_embedding=False,
+                 disable_speaker_embedding_in_decoder=False):
         super(Tacotron2,
               self).__init__(num_chars, num_speakers, r, postnet_output_dim,
                              decoder_output_dim, attn_type, attn_win,
@@ -42,7 +43,7 @@ class Tacotron2(TacotronAbstract):
                              location_attn, attn_K, separate_stopnet,
                              bidirectional_decoder, double_decoder_consistency,
                              ddc_r, gst, gst_embedding_dim, gst_num_heads, gst_style_tokens,
-                             disable_gst, gst_use_speaker_embedding)
+                             disable_gst, gst_use_speaker_embedding, disable_speaker_embedding_in_decoder)
 
         # init layer dims
         decoder_in_features = 512
@@ -57,7 +58,7 @@ class Tacotron2(TacotronAbstract):
             self.embeddings_per_sample = True
 
         # speaker and gst embeddings is concat in decoder input
-        if num_speakers > 1:
+        if num_speakers > 1 and not self.disable_speaker_embedding_in_decoder:
             decoder_in_features = decoder_in_features + speaker_embedding_dim # add speaker embedding dim
         if self.gst:
             decoder_in_features = decoder_in_features + gst_embedding_dim # add gst embedding dim
@@ -119,7 +120,8 @@ class Tacotron2(TacotronAbstract):
                                                 mel_specs if not self.disable_gst else None, # if not disable gst pass wav reference
                                                 speaker_embeddings if self.gst_use_speaker_embedding else None)
 
-        if self.num_speakers > 1:
+        if self.num_speakers > 1 and not self.disable_speaker_embedding_in_decoder:
+            print("Using Speaker Embedding")
             if not self.embeddings_per_sample:
                 # B x 1 x speaker_embed_dim
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
@@ -163,7 +165,7 @@ class Tacotron2(TacotronAbstract):
             encoder_outputs = self.compute_gst(encoder_outputs,
                                                 style_mel if not self.disable_gst else None, # if not disable gst pass wav reference
                                                 speaker_embeddings if self.gst_use_speaker_embedding else None)
-        if self.num_speakers > 1:
+        if self.num_speakers > 1 and not self.disable_speaker_embedding_in_decoder:
             if not self.embeddings_per_sample:
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
             encoder_outputs = self._concat_speaker_embedding(encoder_outputs, speaker_embeddings)
@@ -189,7 +191,7 @@ class Tacotron2(TacotronAbstract):
                                                 style_mel if not self.disable_gst else None, # if not disable gst pass wav reference
                                                 speaker_embeddings if self.gst_use_speaker_embedding else None)
 
-        if self.num_speakers > 1:
+        if self.num_speakers > 1 and not self.disable_speaker_embedding_in_decoder:
             if not self.embeddings_per_sample:
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
             encoder_outputs = self._concat_speaker_embedding(encoder_outputs, speaker_embeddings)

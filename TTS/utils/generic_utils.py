@@ -75,12 +75,25 @@ def set_init_dict(model_dict, checkpoint_state, c):
         k: v
         for k, v in checkpoint_state.items() if k in model_dict
     }
+    for k, v in checkpoint_state.items():
+        if k not in model_dict:
+            print(k)
     # 2. filter out different size layers
+    print("Ignored Layers: ")
+    for k, v in pretrained_dict.items():
+        if v.numel() == model_dict[k].numel():
+            #print('param:', k)
+            pass
+        else:
+            print(k)
+
     pretrained_dict = {
         k: v
         for k, v in pretrained_dict.items()
         if v.numel() == model_dict[k].numel()
     }
+
+
     # 3. skip reinit layers
     if c.reinit_layers is not None:
         for reinit_layer_name in c.reinit_layers:

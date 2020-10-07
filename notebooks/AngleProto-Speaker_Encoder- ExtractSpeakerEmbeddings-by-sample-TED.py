@@ -32,6 +32,7 @@ from TTS.speaker_encoder.model import SpeakerEncoder
 # you may need to change this depending on your system
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 
+from glob import glob
 
 from TTS.tts.utils.speakers import save_speaker_mapping, load_speaker_mapping
 from TTS.utils.audio import AudioProcessor
@@ -44,14 +45,15 @@ from TTS.utils.io import load_config
 
 
 MODEL_RUN_PATH = "../../../../datasets/training/speaker_encoder/LibriTTS-common-voice-voxceleb_angle_proto/"
+JSON_OUTPUT = "../../../../datasets/training/speaker_encoder/LibriTTS-common-voice-voxceleb_angle_proto/ted-e-tts-portuguese-with-interpolation"
 MODEL_PATH = MODEL_RUN_PATH + "320k.pth.tar"
 CONFIG_PATH = MODEL_RUN_PATH + "config.json"
 
 
-DATASETS_NAME = ['vctk', 'brspeech', 'brspeech'] # list the datasets
-DATASETS_PATH = ['../../../../datasets/VCTK-Corpus-removed-silence/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
+DATASETS_NAME = ['brspeech', 'brspeech'] # list the datasets
+DATASETS_PATH = [ '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/', '../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
 
-DATASETS_METAFILE = ['', 'train_TTS-Portuguese_Corpus_metadata.csv','test_TTS-Portuguese_Corpus_metadata.csv']
+DATASETS_METAFILE = [ 'train_TTS-Portuguese_Corpus_metadata.csv','test_TTS-Portuguese_Corpus_metadata.csv']
 
 #DATASETS_NAME = ['brspeech'] # list the datasets
 #DATASETS_PATH = ['../../../../datasets/BRSpeech-3-Speakers-Paper/TTS-Portuguese_Corpus/']
@@ -72,15 +74,29 @@ for i in range(len(DATASETS_NAME)):
       
 meta_data= list(meta_data)
 
+files =  glob('../../../../datasets/TED-100-speakers-paper/TED_Sample/**/*.wav', recursive=True)
+print()
+meta_ted = []
+ted_speakers = set()
+for i in tqdm(range(len(files))):
+    if len(ted_speakers) >= 109:
+        continue
+    wav_file = files[i]
+    speaker_id = wav_file.split('/')[-3]
+    if speaker_id not in ted_speakers:
+        print(speaker_id)
+    meta_ted.append(['', wav_file, speaker_id])
+    ted_speakers.add(speaker_id)
 
+meta_data+= meta_ted
+print("TED Speakers:", len(ted_speakers))
 # In[ ]:
 c = load_config(CONFIG_PATH)
 ap = AudioProcessor(**c['audio'])
 
-#TTS_sample_rate = 22050
-TTS_sample_rate = ap.sample_rate
+TTS_sample_rate = 22050
+#TTS_sample_rate = ap.sample_rate
 SE_sample_rate = ap.sample_rate
-
 ap.sample_rate = TTS_sample_rate
 print(SE_sample_rate, TTS_sample_rate)
 model = SpeakerEncoder(**c.model)
@@ -99,7 +115,11 @@ for i in tqdm(range(len_meta_data)):
     mel_spec = torch.FloatTensor(mel_spec[None, :, :])
     if USE_CUDA:
         mel_spec = mel_spec.cuda()
-    embedd = model.compute_embedding(mel_spec, model_sr=SE_sample_rate, spec_sr=TTS_sample_rate).cpu().detach().numpy().reshape(-1)
+    try:
+        embedd = model.compute_embedding(mel_spec, model_sr=SE_sample_rate, spec_sr=TTS_sample_rate).cpu().detach().numpy().reshape(-1)
+    except:
+        print("sample ignored: ", wav_file)
+        continue
     embeddings_dict[wav_file_name] = [embedd, speaker_id]
 
 
@@ -107,15 +127,17 @@ for i in tqdm(range(len_meta_data)):
 
 
 # create and export speakers.json
+
+os.makedirs(JSON_OUTPUT,exist_ok=True)
 speaker_mapping = {sample: {'name': embeddings_dict[sample][1], 'embedding':embeddings_dict[sample][0].reshape(-1).tolist()} for i, sample in enumerate(embeddings_dict.keys())}
-save_speaker_mapping(MODEL_RUN_PATH, speaker_mapping)
+save_speaker_mapping(JSON_OUTPUT, speaker_mapping)
 
 
 # In[ ]:
 
 
 #test load integrity
-speaker_mapping_load = load_speaker_mapping(MODEL_RUN_PATH)
+speaker_mapping_load = load_speaker_mapping(JSON_OUTPUT)
 assert speaker_mapping == speaker_mapping_load
-print("The file speakers.json has been exported to ",MODEL_RUN_PATH, ' with ', len(embeddings_dict.keys()), ' speakers')
+print("The file speakers.json has been exported to ",JSON_OUTPUT, ' with ', len(embeddings_dict.keys()), ' speakers')
 
