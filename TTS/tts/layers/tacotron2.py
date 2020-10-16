@@ -146,7 +146,7 @@ class Decoder(nn.Module):
     #pylint: disable=attribute-defined-outside-init
     def __init__(self, in_channels, frame_channels, r, attn_type, attn_win, attn_norm,
                  prenet_type, prenet_dropout, forward_attn, trans_agent,
-                 forward_attn_mask, location_attn, attn_K, separate_stopnet):
+                 forward_attn_mask, location_attn, attn_K, separate_stopnet, disable_prenet=False):
         super(Decoder, self).__init__()
         self.frame_channels = frame_channels
         self.r_init = r
@@ -163,6 +163,8 @@ class Decoder(nn.Module):
         self.attn_dim = 128
         self.p_attention_dropout = 0.1
         self.p_decoder_dropout = 0.1
+        
+        self.disable_prenet = disable_prenet
 
         # memory -> |Prenet| -> processed_memory
         prenet_dim = self.frame_channels
@@ -311,27 +313,67 @@ class Decoder(nn.Module):
             - alignments: (B, T_in, T_out)
             - stop_tokens: (B, T_out)
         """
-        memory = self.get_go_frame(inputs).unsqueeze(0)
-        memories = self._reshape_memory(memories)
-        memories = torch.cat((memory, memories), dim=0)
-        memories = self._update_memory(memories)
-        memories = self.prenet(memories)
+        if self.disable_prenet:
+            outputs, alignments, stop_tokens = self.forward_disable_prenet(inputs, memories, mask)
+            return outputs, alignments, stop_tokens
+        else:
+            memory = self.get_go_frame(inputs).unsqueeze(0)
+            memories = self._reshape_memory(memories)
+            memories = torch.cat((memory, memories), dim=0)
+            memories = self._update_memory(memories)
+            memories = self.prenet(memories)
 
+            self._init_states(inputs, mask=mask)
+            self.attention.init_states(inputs)
+
+            outputs, stop_tokens, alignments = [], [], []
+            while len(outputs) < memories.size(0) - 1:
+                memory = memories[len(outputs)]
+                decoder_output, attention_weights, stop_token = self.decode(memory)
+                outputs += [decoder_output.squeeze(1)]
+                stop_tokens += [stop_token.squeeze(1)]
+                alignments += [attention_weights]
+
+            outputs, stop_tokens, alignments = self._parse_outputs(
+                outputs, stop_tokens, alignments)
+            return outputs, alignments, stop_tokens
+
+    def forward_disable_prenet(self, inputs, memories, mask):
+        r"""Train Decoder with teacher forcing.
+        Args:
+            inputs: Encoder outputs.
+            memories: Feature frames for teacher-forcing.
+            mask: Attention mask for sequence padding.
+
+        Shapes:
+            - inputs: (B, T, D_out_enc)
+            - memory: (B, T_mel, D_mel)
+            - outputs: (B, T_mel, D_mel)
+            - alignments: (B, T_in, T_out)
+            - stop_tokens: (B, T_out)
+        """
+        memory = self.get_go_frame(inputs)
+        memories = self._reshape_memory(memories)
+        num_frames = memories.size(0)
+
+        memory = self._update_memory(memory)
         self._init_states(inputs, mask=mask)
         self.attention.init_states(inputs)
 
         outputs, stop_tokens, alignments = [], [], []
-        while len(outputs) < memories.size(0) - 1:
-            memory = memories[len(outputs)]
-            decoder_output, attention_weights, stop_token = self.decode(memory)
+        while len(outputs) < num_frames:
+            memory = self.prenet(memory)
+            decoder_output, alignment, stop_token = self.decode(memory)
             outputs += [decoder_output.squeeze(1)]
             stop_tokens += [stop_token.squeeze(1)]
-            alignments += [attention_weights]
+            alignments += [alignment]
+
+            memory = self._update_memory(decoder_output)
 
         outputs, stop_tokens, alignments = self._parse_outputs(
-            outputs, stop_tokens, alignments)
-        return outputs, alignments, stop_tokens
+                outputs, stop_tokens, alignments)
 
+        return outputs, alignments, stop_tokens
 
     def inference(self, inputs):
         r"""Decoder inference without teacher forcing and use

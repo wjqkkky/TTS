@@ -157,6 +157,9 @@
 
     "disable_speaker_embedding_in_decoder": false, // if true the external speaker embedding is not passed to the decoder
 
+    "disable_prenet": false, // if true during training, prenet is used as inference, therefore, it does not receive the expected spectrogram.
+
+
     "use_gst": true,       			    // use global style tokens
     "gst":	{			                // gst parameter if gst is enabled
         "gst_style_input": null,        // Condition the style input either on a 

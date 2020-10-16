@@ -33,6 +33,7 @@ class Tacotron2(TacotronAbstract):
                  gst_num_heads=4,
                  gst_style_tokens=10,
                  disable_gst=False,
+                 disable_prenet=False,
                  gst_use_speaker_embedding=False,
                  disable_speaker_embedding_in_decoder=False):
         super(Tacotron2,
@@ -77,7 +78,7 @@ class Tacotron2(TacotronAbstract):
         self.decoder = Decoder(decoder_in_features, self.decoder_output_dim, r, attn_type, attn_win,
                                attn_norm, prenet_type, prenet_dropout,
                                forward_attn, trans_agent, forward_attn_mask,
-                               location_attn, attn_K, separate_stopnet)
+                               location_attn, attn_K, separate_stopnet, disable_prenet=disable_prenet)
         self.postnet = Postnet(self.postnet_output_dim)
 
         # global style token layers
@@ -97,7 +98,7 @@ class Tacotron2(TacotronAbstract):
                 decoder_in_features, self.decoder_output_dim, ddc_r, attn_type,
                 attn_win, attn_norm, prenet_type, prenet_dropout, forward_attn,
                 trans_agent, forward_attn_mask, location_attn, attn_K,
-                separate_stopnet)
+                separate_stopnet,  disable_prenet=disable_prenet)
 
     @staticmethod
     def shape_outputs(mel_outputs, mel_outputs_postnet, alignments):
@@ -121,7 +122,6 @@ class Tacotron2(TacotronAbstract):
                                                 speaker_embeddings if self.gst_use_speaker_embedding else None)
 
         if self.num_speakers > 1 and not self.disable_speaker_embedding_in_decoder:
-            print("Using Speaker Embedding")
             if not self.embeddings_per_sample:
                 # B x 1 x speaker_embed_dim
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
