@@ -127,16 +127,16 @@ class TacotronAbstract(ABC, nn.Module):
             output_mask = sequence_mask(mel_lengths, max_len=max_len).to(device)
         return input_mask, output_mask
 
-    def _backward_pass(self, mel_specs, encoder_outputs, mask):
+    def _backward_pass(self, mel_specs, encoder_outputs, mask, speaker_embeddings=None):
         """ Run backwards decoder """
         decoder_outputs_b, alignments_b, _ = self.decoder_backward(
             encoder_outputs, torch.flip(mel_specs, dims=(1,)), mask,
-            self.speaker_embeddings_projected)
+            speaker_embeddings=speaker_embeddings)
         decoder_outputs_b = decoder_outputs_b.transpose(1, 2).contiguous()
         return decoder_outputs_b, alignments_b
 
     def _coarse_decoder_pass(self, mel_specs, encoder_outputs, alignments,
-                             input_mask):
+                             input_mask, speaker_embeddings=None):
         """ Double Decoder Consistency """
         T = mel_specs.shape[1]
         if T % self.coarse_decoder.r > 0:
@@ -144,7 +144,7 @@ class TacotronAbstract(ABC, nn.Module):
             mel_specs = torch.nn.functional.pad(mel_specs,
                                                 (0, 0, 0, padding_size, 0, 0))
         decoder_outputs_backward, alignments_backward, _ = self.coarse_decoder(
-            encoder_outputs.detach(), mel_specs, input_mask)
+            encoder_outputs.detach(), mel_specs, input_mask, speaker_embeddings=speaker_embeddings)
         # scale_factor = self.decoder.r_init / self.decoder.r
         alignments_backward = torch.nn.functional.interpolate(
             alignments_backward.transpose(1, 2),

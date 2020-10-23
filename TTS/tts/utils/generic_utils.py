@@ -106,7 +106,8 @@ def setup_model(num_chars, num_speakers, c, speaker_embedding_dim=None):
                         double_decoder_consistency=c.double_decoder_consistency,
                         ddc_r=c.ddc_r,
                         disable_prenet=c.disable_prenet,
-                        speaker_embedding_dim=speaker_embedding_dim)
+                        speaker_embedding_dim=speaker_embedding_dim,
+                        use_speaker_embedding_in_prenet=c.use_speaker_embedding_in_prenet)
     return model
 
 class KeepAverage():

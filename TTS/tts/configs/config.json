@@ -155,6 +155,7 @@
     "freeze_postnet": false,
     "freeze_gst": false,
 
+    "use_speaker_embedding_in_prenet": false,
     "disable_speaker_embedding_in_decoder": false, // if true the external speaker embedding is not passed to the decoder
 
     "disable_prenet": false, // if true during training, prenet is used as inference, therefore, it does not receive the expected spectrogram.

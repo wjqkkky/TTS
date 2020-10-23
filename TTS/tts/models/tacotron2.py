@@ -35,7 +35,8 @@ class Tacotron2(TacotronAbstract):
                  disable_gst=False,
                  disable_prenet=False,
                  gst_use_speaker_embedding=False,
-                 disable_speaker_embedding_in_decoder=False):
+                 disable_speaker_embedding_in_decoder=False,
+                 use_speaker_embedding_in_prenet=False):
         super(Tacotron2,
               self).__init__(num_chars, num_speakers, r, postnet_output_dim,
                              decoder_output_dim, attn_type, attn_win,
@@ -45,6 +46,8 @@ class Tacotron2(TacotronAbstract):
                              bidirectional_decoder, double_decoder_consistency,
                              ddc_r, gst, gst_embedding_dim, gst_num_heads, gst_style_tokens,
                              disable_gst, gst_use_speaker_embedding, disable_speaker_embedding_in_decoder)
+
+        self.use_speaker_embedding_in_prenet = use_speaker_embedding_in_prenet
 
         # init layer dims
         decoder_in_features = 512
@@ -78,7 +81,7 @@ class Tacotron2(TacotronAbstract):
         self.decoder = Decoder(decoder_in_features, self.decoder_output_dim, r, attn_type, attn_win,
                                attn_norm, prenet_type, prenet_dropout,
                                forward_attn, trans_agent, forward_attn_mask,
-                               location_attn, attn_K, separate_stopnet, disable_prenet=disable_prenet)
+                               location_attn, attn_K, separate_stopnet, disable_prenet=disable_prenet, speaker_embedding_dim=speaker_embedding_dim if self.use_speaker_embedding_in_prenet else 0)
         self.postnet = Postnet(self.postnet_output_dim)
 
         # global style token layers
@@ -98,7 +101,7 @@ class Tacotron2(TacotronAbstract):
                 decoder_in_features, self.decoder_output_dim, ddc_r, attn_type,
                 attn_win, attn_norm, prenet_type, prenet_dropout, forward_attn,
                 trans_agent, forward_attn_mask, location_attn, attn_K,
-                separate_stopnet,  disable_prenet=disable_prenet)
+                separate_stopnet,  disable_prenet=disable_prenet, speaker_embedding_dim=speaker_embedding_dim if self.use_speaker_embedding_in_prenet else 0)
 
     @staticmethod
     def shape_outputs(mel_outputs, mel_outputs_postnet, alignments):
@@ -134,7 +137,7 @@ class Tacotron2(TacotronAbstract):
 
         # B x mel_dim x T_out -- B x T_out//r x T_in -- B x T_out//r
         decoder_outputs, alignments, stop_tokens = self.decoder(
-            encoder_outputs, mel_specs, input_mask)
+            encoder_outputs, mel_specs, input_mask, speaker_embeddings=speaker_embeddings if self.use_speaker_embedding_in_prenet else None)
         # sequence masking
         if mel_lengths is not None:
             decoder_outputs = decoder_outputs * output_mask.unsqueeze(1).expand_as(decoder_outputs)
@@ -148,10 +151,10 @@ class Tacotron2(TacotronAbstract):
         decoder_outputs, postnet_outputs, alignments = self.shape_outputs(
             decoder_outputs, postnet_outputs, alignments)
         if self.bidirectional_decoder:
-            decoder_outputs_backward, alignments_backward = self._backward_pass(mel_specs, encoder_outputs, input_mask)
+            decoder_outputs_backward, alignments_backward = self._backward_pass(mel_specs, encoder_outputs, input_mask, speaker_embeddings=speaker_embeddings if self.use_speaker_embedding_in_prenet else None)
             return decoder_outputs, postnet_outputs, alignments, stop_tokens, decoder_outputs_backward, alignments_backward
         if self.double_decoder_consistency:
-            decoder_outputs_backward, alignments_backward = self._coarse_decoder_pass(mel_specs, encoder_outputs, alignments, input_mask)
+            decoder_outputs_backward, alignments_backward = self._coarse_decoder_pass(mel_specs, encoder_outputs, alignments, input_mask, speaker_embeddings=speaker_embeddings if self.use_speaker_embedding_in_prenet else None)
             return  decoder_outputs, postnet_outputs, alignments, stop_tokens, decoder_outputs_backward, alignments_backward
         return decoder_outputs, postnet_outputs, alignments, stop_tokens
 
@@ -171,7 +174,7 @@ class Tacotron2(TacotronAbstract):
             encoder_outputs = self._concat_speaker_embedding(encoder_outputs, speaker_embeddings)
 
         decoder_outputs, alignments, stop_tokens = self.decoder.inference(
-            encoder_outputs)
+            encoder_outputs, speaker_embeddings=speaker_embeddings if self.use_speaker_embedding_in_prenet else None)
         postnet_outputs = self.postnet(decoder_outputs)
         postnet_outputs = decoder_outputs + postnet_outputs
         decoder_outputs, postnet_outputs, alignments = self.shape_outputs(
@@ -197,7 +200,7 @@ class Tacotron2(TacotronAbstract):
             encoder_outputs = self._concat_speaker_embedding(encoder_outputs, speaker_embeddings)
 
         mel_outputs, alignments, stop_tokens = self.decoder.inference_truncated(
-            encoder_outputs)
+            encoder_outputs, speaker_embeddings=speaker_embeddings if self.use_speaker_embedding_in_prenet else None)
         mel_outputs_postnet = self.postnet(mel_outputs)
         mel_outputs_postnet = mel_outputs + mel_outputs_postnet
         mel_outputs, mel_outputs_postnet, alignments = self.shape_outputs(
