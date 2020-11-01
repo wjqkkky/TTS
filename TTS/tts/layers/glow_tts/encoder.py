@@ -4,6 +4,7 @@ from torch import nn
 
 from TTS.tts.layers.glow_tts.transformer import Transformer
 from TTS.tts.layers.glow_tts.gated_conv import GatedConvBlock
+from TTS.tts.layers.glow_tts.residual_conv import ConvResidualBlocks
 from TTS.tts.utils.generic_utils import sequence_mask
 from TTS.tts.layers.glow_tts.glow import ConvLayerNorm
 from TTS.tts.layers.glow_tts.duration_predictor import DurationPredictor
@@ -61,9 +62,7 @@ class Encoder(nn.Module):
         self.use_prenet = use_prenet
         self.c_in_channels = c_in_channels
         self.encoder_type = encoder_type
-        # embedding layer
-        self.emb = nn.Embedding(num_chars, hidden_channels)
-        nn.init.normal_(self.emb.weight, 0.0, hidden_channels**-0.5)
+        
         # init encoder
         if encoder_type.lower() == "transformer":
             # optional convolutional prenet
@@ -89,6 +88,11 @@ class Encoder(nn.Module):
                                           kernel_size=5,
                                           dropout_p=dropout_p,
                                           num_layers=3 + num_layers)
+        elif encoder_type.lower() == 'residualconv':
+            hidden_channels = hidden_channels - 64 # 128 dim
+            self.encoder = ConvResidualBlocks(hidden_channels,
+                                          kernel_size=4,
+                                          dilations=4*[1,2,4]+[1])
         elif encoder_type.lower() == 'time-depth-separable':
             # optional convolutional prenet
             if use_prenet:
@@ -103,7 +107,10 @@ class Encoder(nn.Module):
                                                        hidden_channels,
                                                        kernel_size=5,
                                                        num_layers=3 + num_layers)
-
+        # embedding layer
+        self.emb = nn.Embedding(num_chars, hidden_channels)
+        nn.init.normal_(self.emb.weight, 0.0, hidden_channels**-0.5)
+        
         # final projection layers
         self.proj_m = nn.Conv1d(hidden_channels, out_channels, 1)
         if not mean_only:

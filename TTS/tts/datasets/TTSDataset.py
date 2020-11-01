@@ -213,18 +213,20 @@ class MyDataset(Dataset):
             speaker_name = [
                 batch[idx]['speaker_name'] for idx in ids_sorted_decreasing
             ]
+
+            wav_files_names = [
+                batch[idx]['wav_file_name'] for idx in ids_sorted_decreasing
+            ]
+
             # get speaker embeddings
             if self.speaker_mapping is not None:
-                wav_files_names = [
-                    batch[idx]['wav_file_name']
-                    for idx in ids_sorted_decreasing
-                ]
                 speaker_embedding = [
                     self.speaker_mapping[w]['embedding']
                     for w in wav_files_names
                 ]
             else:
                 speaker_embedding = None
+                wav_files_names = None
             # compute features
             mel = [self.ap.melspectrogram(w).astype('float32') for w in wav]
 
@@ -284,7 +286,7 @@ class MyDataset(Dataset):
             else:
                 attns = None
             return text, text_lenghts, speaker_name, linear, mel, mel_lengths, \
-                   stop_targets, item_idxs, speaker_embedding, attns
+                   stop_targets, item_idxs, speaker_embedding, attns, wav_files_names
 
         raise TypeError(("batch must contain tensors, numbers, dicts or lists;\
                          found {}".format(type(batch[0]))))

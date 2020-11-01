@@ -82,7 +82,7 @@ def format_data(data):
     speaker_names = data[2]
     mel_input = data[4].permute(0, 2, 1)  # B x D x T
     mel_lengths = data[5]
-    attn_mask = data[8]
+    attn_mask = data[9]
     avg_text_length = torch.mean(text_lengths.float())
     avg_spec_length = torch.mean(mel_lengths.float())
 
