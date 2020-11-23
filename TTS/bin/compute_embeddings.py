@@ -9,7 +9,7 @@ import torch
 from TTS.speaker_encoder.model import SpeakerEncoder
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
-from TTS.utils.io import save_speaker_mapping
+from TTS.tts.utils.speakers import save_speaker_mapping
 from TTS.tts.datasets.preprocess import load_meta_data
 
 parser = argparse.ArgumentParser(
