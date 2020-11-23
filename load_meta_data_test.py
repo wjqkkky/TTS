@@ -11,3 +11,5 @@ if __name__ == '__main__':
 	]
 
 	wav_files, _ = load_meta_data(dataset_config, eval_split=False)
+	print(wav_files)
+	print(_)
