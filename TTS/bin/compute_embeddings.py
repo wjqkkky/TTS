@@ -120,7 +120,7 @@ for idx, wav_file in enumerate(tqdm(wav_files)):
         wav_file_name = os.path.basename(wav_file)
         speaker_mapping[wav_file_name] = {}
         speaker_mapping[wav_file_name]['name'] = speaker_name
-        speaker_mapping[wav_file_name]['embedding'] = embedd.detach().cpu().numpy()
+        speaker_mapping[wav_file_name]['embedding'] = embedd.detach().cpu().numpy().tolist()
 
 if args.target_dataset != '':
     # save speaker_mapping if target dataset is defined
