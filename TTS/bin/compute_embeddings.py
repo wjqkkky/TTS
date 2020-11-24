@@ -59,7 +59,7 @@ if args.target_dataset != '':
         {
             "name": args.target_dataset,
             "path": args.data_path,
-            "meta_file_train": None,
+            "meta_file_train": "label.txt",
             "meta_file_val": None
         },
     ]

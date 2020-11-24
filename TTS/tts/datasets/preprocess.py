@@ -199,16 +199,16 @@ def libri_tts(root_path, meta_files=None):
 	return items
 
 
-def aishell_3(root_path, mata_file):
+def aishell_3(root_path, meta_file):
 	items = []
-	with open(os.path.join(root_path, mata_file), "r", encoding="utf-8") as f:
+	with open(os.path.join(root_path, meta_file), "r", encoding="utf-8") as f:
 		while 1:
 			line = f.readline()
 			if not line:
 				break
 			filename, text = line.split("|")
 			speaker_name = filename[:7]
-			wav_file = os.path.join(root_path, "wav", speaker_name, filename)
+			wav_file = os.path.join(root_path, "wav", speaker_name, filename + ".wav")
 			items.append([text, wav_file, 'AISHELL_' + speaker_name])
 	return items
 
