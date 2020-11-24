@@ -124,5 +124,6 @@ for idx, wav_file in enumerate(tqdm(wav_files)):
 
 if args.target_dataset != '':
     # save speaker_mapping if target dataset is defined
-    mapping_file_path = os.path.join(args.output_path, 'speakers.json')
+    # mapping_file_path = os.path.join(args.output_path, 'speakers.json')
+    mapping_file_path = os.path.join(args.output_path)
     save_speaker_mapping(mapping_file_path, speaker_mapping)
