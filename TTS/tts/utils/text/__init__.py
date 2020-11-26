@@ -89,7 +89,7 @@ def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=
 	# wjq: don't use cleaner or text2phone
 	phonemes = text.strip().split()
 	for phoneme in phonemes:
-		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in punctuations:
+		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in _punctuations:
 			sequence += _phoneme_to_sequence(phoneme)
 			sequence += _phoneme_to_sequence(" ")
 		else:
