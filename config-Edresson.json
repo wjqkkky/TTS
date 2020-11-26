@@ -130,7 +130,7 @@
     "freeze_gst": false,
     "use_gst": true,       // TACOTRON ONLY: use global style tokens
 
-    "use_data_aumentation_speakers": true,
+    "use_data_aumentation_speakers": false,
 
 
     "gst":	{			                // gst parameter if gst is enabled
