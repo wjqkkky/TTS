@@ -510,7 +510,7 @@ def main(args):  # pylint: disable=redefined-outer-name
 	# DISTRUBUTED
 	if num_gpus > 1:
 		init_distributed(args.rank, num_gpus, args.group_id, c.distributed["backend"], c.distributed["url"])
-		num_chars = len(phonemes) if c.use_phonemes else len(symbols)
+	num_chars = len(phonemes) if c.use_phonemes else len(symbols)
 
 	# load data instances
 	meta_data_train, meta_data_eval = load_meta_data(c.datasets)
