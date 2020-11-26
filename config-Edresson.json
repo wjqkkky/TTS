@@ -131,6 +131,7 @@
     "no_freeze_attn": false, // if true during decoder freeze, dont freeze attention layers
     "freeze_prenet": false, // if your freeze decoder  its freeze prenet too, this param is util for you freeze prenet and not freeze all decoder.
 
+    "use_diferent_speaker_mapping_for_loss_speaker_encoder": true, // if false pass model input speaker embedding. if true you need provide speakers.json with external_speaker_embedding_file and data_aumentation_external_speaker_embedding_file speakers
     "use_data_aumentation_speakers": false,
     "use_speaker_embedding_in_prenet": false,
     "disable_speaker_embedding_in_decoder": false, // if true the external speaker embedding is not passed to the decoder
