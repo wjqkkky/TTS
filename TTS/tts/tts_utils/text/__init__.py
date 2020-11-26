@@ -4,10 +4,10 @@ import re
 from packaging import version
 import phonemizer
 from phonemizer.phonemize import phonemize
-from TTS.tts.utils.text import cleaners
-from TTS.tts.utils.text.symbols import make_symbols, symbols, phonemes, _phoneme_punctuations, _bos, \
+from TTS.tts.tts_utils.text import cleaners
+from TTS.tts.tts_utils.text.symbols import make_symbols, symbols, phonemes, _phoneme_punctuations, _bos, \
 	_eos
-import TTS.tts.utils.text.symbols as sybs
+import TTS.tts.tts_utils.text.symbols as sybs
 
 # Mappings from symbol to numeric ID and vice versa:
 _symbol_to_id = {s: i for i, s in enumerate(symbols)}

@@ -3,7 +3,7 @@ import torch as T
 
 from TTS.tts.layers.tacotron import Prenet, CBHG, Decoder, Encoder
 from TTS.tts.layers.losses import L1LossMasked
-from TTS.tts.utils.generic_utils import sequence_mask
+from TTS.tts.tts_utils.generic_utils import sequence_mask
 
 # pylint: disable=unused-variable
 

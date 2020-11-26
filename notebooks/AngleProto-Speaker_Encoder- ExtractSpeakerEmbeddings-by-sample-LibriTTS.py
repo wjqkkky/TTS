@@ -27,14 +27,14 @@ import torch
 
 import numpy as np
 from tqdm import tqdm
-from TTS.tts.utils.speakers import save_speaker_mapping, load_speaker_mapping
+from TTS.tts.tts_utils.speakers import save_speaker_mapping, load_speaker_mapping
 from TTS.speaker_encoder.model import SpeakerEncoder
 # you may need to change this depending on your system
 os.environ['CUDA_VISIBLE_DEVICES']='0'
 
 from glob import glob
 
-from TTS.tts.utils.speakers import save_speaker_mapping, load_speaker_mapping
+from TTS.tts.tts_utils.speakers import save_speaker_mapping, load_speaker_mapping
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 

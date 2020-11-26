@@ -5,7 +5,7 @@ import scipy.io
 import scipy.io.wavfile
 import scipy.signal
 
-from TTS.tts.utils.data import StandardScaler
+from TTS.tts.tts_utils.data import StandardScaler
 
 
 class AudioProcessor(object):

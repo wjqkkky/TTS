@@ -4,7 +4,7 @@ import os
 # pylint: disable=unused-import
 import unittest
 from tests import get_tests_input_path
-from TTS.tts.utils.text import *
+from TTS.tts.tts_utils.text import *
 from tests import get_tests_path
 from TTS.utils.io import load_config
 
