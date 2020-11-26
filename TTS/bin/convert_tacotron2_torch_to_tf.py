@@ -15,8 +15,8 @@ from TTS.tts.tf.models.tacotron2 import Tacotron2
 from TTS.tts.tf.utils.convert_torch_to_tf_utils import (
     compare_torch_tf, convert_tf_name, transfer_weights_torch_to_tf)
 from TTS.tts.tf.utils.generic_utils import save_checkpoint
-from TTS.tts.tts_utils.generic_utils import setup_model
-from TTS.tts.tts_utils.text.symbols import phonemes, symbols
+from TTS.tts.utils.generic_utils import setup_model
+from TTS.tts.utils.text.symbols import _phonemes, _symbols
 from TTS.utils.io import load_config
 
 sys.path.append('/home/erogol/Projects')
@@ -41,7 +41,7 @@ c = load_config(config_path)
 num_speakers = 0
 
 # init torch model
-num_chars = len(phonemes) if c.use_phonemes else len(symbols)
+num_chars = len(_phonemes) if c.use_phonemes else len(_symbols)
 model = setup_model(num_chars, num_speakers, c)
 checkpoint = torch.load(args.torch_model_path,
                         map_location=torch.device('cpu'))

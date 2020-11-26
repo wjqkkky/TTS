@@ -2,7 +2,7 @@ import os
 from glob import glob
 import re
 import sys
-from TTS.tts.tts_utils.generic_utils import split_dataset
+from TTS.tts.utils.generic_utils import split_dataset
 
 
 def load_meta_data(datasets):

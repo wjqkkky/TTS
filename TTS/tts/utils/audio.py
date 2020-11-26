@@ -5,7 +5,7 @@ import numpy as np
 import scipy.io
 import scipy.signal
 
-from TTS.tts.tts_utils.stft_torch import STFT
+from TTS.tts.utils.stft_torch import STFT
 
 class AudioProcessor(object):
     def __init__(self,

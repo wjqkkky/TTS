@@ -5,8 +5,8 @@ import torch
 import random
 from torch.utils.data import Dataset
 
-from TTS.tts.tts_utils.text import text_to_sequence, phoneme_to_sequence, pad_with_eos_bos
-from TTS.tts.tts_utils.data import prepare_data, prepare_tensor, prepare_stop_target
+from TTS.tts.utils.text import text_to_sequence, phoneme_to_sequence, pad_with_eos_bos
+from TTS.tts.utils.data import prepare_data, prepare_tensor, prepare_stop_target
 
 
 class MyDataset(Dataset):

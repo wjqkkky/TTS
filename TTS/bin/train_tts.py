@@ -18,17 +18,17 @@ from TTS.tts.datasets.preprocess import load_meta_data
 from TTS.tts.datasets.TTSDataset import MyDataset
 from TTS.tts.layers.losses import TacotronLoss
 from TTS.speaker_encoder.model import SpeakerEncoder
-from TTS.tts.tts_utils.distribute import (DistributedSampler,
-										  apply_gradient_allreduce,
-										  init_distributed, reduce_tensor)
-from TTS.tts.tts_utils.generic_utils import check_config, setup_model
-from TTS.tts.tts_utils.io import save_best_model, save_checkpoint
-from TTS.tts.tts_utils.measures import alignment_diagonal_score
-from TTS.tts.tts_utils.speakers import (get_speakers, load_speaker_mapping,
-										save_speaker_mapping)
-from TTS.tts.tts_utils.synthesis import synthesis
-from TTS.tts.tts_utils.text.symbols import make_symbols, phonemes, symbols
-from TTS.tts.tts_utils.visual import plot_alignment, plot_spectrogram
+from TTS.tts.utils.distribute import (DistributedSampler,
+									  apply_gradient_allreduce,
+									  init_distributed, reduce_tensor)
+from TTS.tts.utils.generic_utils import check_config, setup_model
+from TTS.tts.utils.io import save_best_model, save_checkpoint
+from TTS.tts.utils.measures import alignment_diagonal_score
+from TTS.tts.utils.speakers import (get_speakers, load_speaker_mapping,
+									save_speaker_mapping)
+from TTS.tts.utils.synthesis import synthesis
+from TTS.tts.utils.text.symbols import make_symbols, _phonemes, _symbols
+from TTS.tts.utils.visual import plot_alignment, plot_spectrogram
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.console_logger import ConsoleLogger
 from TTS.utils.generic_utils import (KeepAverage, count_parameters,
@@ -40,7 +40,6 @@ from TTS.utils.tensorboard_logger import TensorboardLogger
 from TTS.utils.training import (NoamLR, adam_weight_decay, check_update,
 								gradual_training_scheduler, set_weight_decay,
 								setup_torch_training_env)
-import TTS.tts.tts_utils.text.symbols as sybs
 
 use_cuda, num_gpus = setup_torch_training_env(True, False)
 
@@ -506,7 +505,7 @@ def main(args):  # pylint: disable=redefined-outer-name
 	if 'characters' in c.keys():
 		symbols, phonemes = make_symbols(**c.characters)
 	else:
-		symbols, phonemes = sybs.symbols, sybs.phonemes
+		symbols, phonemes = _phonemes, _symbols
 
 	# DISTRUBUTED
 	if num_gpus > 1:

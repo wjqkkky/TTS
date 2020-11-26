@@ -4,17 +4,16 @@ import re
 from packaging import version
 import phonemizer
 from phonemizer.phonemize import phonemize
-from TTS.tts.tts_utils.text import cleaners
-from TTS.tts.tts_utils.text.symbols import make_symbols, symbols, phonemes, _phoneme_punctuations, _bos, \
-	_eos
-import TTS.tts.tts_utils.text.symbols as sybs
+from TTS.tts.utils.text import cleaners
+from TTS.tts.utils.text.symbols import make_symbols, _symbols, _phonemes, _phoneme_punctuations, _bos, \
+	_eos,_punctuations
 
 # Mappings from symbol to numeric ID and vice versa:
-_symbol_to_id = {s: i for i, s in enumerate(symbols)}
-_id_to_symbol = {i: s for i, s in enumerate(symbols)}
+_symbol_to_id = {s: i for i, s in enumerate(_symbols)}
+_id_to_symbol = {i: s for i, s in enumerate(_symbols)}
 
-_phonemes_to_id = {s: i for i, s in enumerate(phonemes)}
-_id_to_phonemes = {i: s for i, s in enumerate(phonemes)}
+_phonemes_to_id = {s: i for i, s in enumerate(_phonemes)}
+_id_to_phonemes = {i: s for i, s in enumerate(_phonemes)}
 
 # Regular expression matching text enclosed in curly braces:
 _CURLY_RE = re.compile(r'(.*?)\{(.+?)\}(.*)')
@@ -90,7 +89,7 @@ def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=
 	# wjq: don't use cleaner or text2phone
 	phonemes = text.strip().split()
 	for phoneme in phonemes:
-		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in sybs.punctuations:
+		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in punctuations:
 			sequence += _phoneme_to_sequence(phoneme)
 			sequence += _phoneme_to_sequence(" ")
 		else:

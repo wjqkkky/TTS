@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional
-from TTS.tts.tts_utils.generic_utils import sequence_mask
+from TTS.tts.utils.generic_utils import sequence_mask
 
 
 class L1LossMasked(nn.Module):

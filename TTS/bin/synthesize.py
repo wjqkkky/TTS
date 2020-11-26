@@ -10,9 +10,9 @@ import time
 
 import torch
 
-from TTS.tts.tts_utils.generic_utils import setup_model
-from TTS.tts.tts_utils.synthesis import synthesis
-from TTS.tts.tts_utils.text.symbols import make_symbols, phonemes, symbols
+from TTS.tts.utils.generic_utils import setup_model
+from TTS.tts.utils.synthesis import synthesis
+from TTS.tts.utils.text.symbols import make_symbols, _phonemes, _symbols
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from TTS.vocoder.utils.generic_utils import setup_generator

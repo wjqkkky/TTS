@@ -26,7 +26,7 @@ _pad = '_'
 _eos = '~'
 _bos = '^'
 _characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!\'(),-.:;? '
-punctuations = '.?!,'  # wjq use this
+_punctuations = '.?!,'  # wjq use this
 _phoneme_punctuations = '.!;:,?'
 
 # Phonemes definition
@@ -46,14 +46,14 @@ with open("characters.txt") as f:
 			break
 		_phonemes_list.append(line.strip())
 
-symbols, phonemes = make_symbols(_characters, _phonemes_list, punctuations, _pad, _eos, _bos)
+_symbols, _phonemes = make_symbols(_characters, _phonemes_list, _punctuations, _pad, _eos, _bos)
 
 # Generate ALIEN language
 # from random import shuffle
 # shuffle(phonemes)
 
 if __name__ == '__main__':
-	print(" > TTS symbols {}".format(len(symbols)))
-	print(symbols)
-	print(" > TTS phonemes {}".format(len(phonemes)))
-	print(phonemes)
+	print(" > TTS symbols {}".format(len(_symbols)))
+	print(_symbols)
+	print(" > TTS phonemes {}".format(len(_phonemes)))
+	print(_phonemes)

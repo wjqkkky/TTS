@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import torch
 from torch import nn
 
-from TTS.tts.tts_utils.generic_utils import sequence_mask
+from TTS.tts.utils.generic_utils import sequence_mask
 
 
 class TacotronAbstract(ABC, nn.Module):

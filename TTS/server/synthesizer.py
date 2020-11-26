@@ -9,14 +9,14 @@ import pysbd
 
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
-from TTS.tts.tts_utils.generic_utils import setup_model
-from TTS.tts.tts_utils.speakers import load_speaker_mapping
+from TTS.tts.utils.generic_utils import setup_model
+from TTS.tts.utils.speakers import load_speaker_mapping
 from TTS.vocoder.utils.generic_utils import setup_generator
 # pylint: disable=unused-wildcard-import
 # pylint: disable=wildcard-import
-from TTS.tts.tts_utils.synthesis import *
+from TTS.tts.utils.synthesis import *
 
-from TTS.tts.tts_utils.text import make_symbols, phonemes, symbols
+from TTS.tts.utils.text import make_symbols, _phonemes, _symbols
 
 
 class Synthesizer(object):

@@ -243,7 +243,7 @@ def check_config(c):
 
     # dataloading
     # pylint: disable=import-outside-toplevel
-    from TTS.tts.tts_utils.text import cleaners
+    from TTS.tts.utils.text import cleaners
     check_argument('text_cleaner', c, restricted=True, val_type=str, enum_list=dir(cleaners))
     check_argument('enable_eos_bos_chars', c, restricted=True, val_type=bool)
     check_argument('num_loader_workers', c, restricted=True, val_type=int, min_val=0)
