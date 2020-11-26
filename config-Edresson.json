@@ -130,6 +130,9 @@
     "freeze_gst": false,
     "use_gst": true,       // TACOTRON ONLY: use global style tokens
 
+    "use_data_aumentation_speakers": true,
+
+
     "gst":	{			                // gst parameter if gst is enabled
         "gst_style_input": null,        // Condition the style input either on a
                                         // -> wave file [path to wave] or
