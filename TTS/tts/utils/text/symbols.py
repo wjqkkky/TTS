@@ -16,7 +16,7 @@ def make_symbols(characters, phonemes_list, punctuations='!\'(),-.:;? ', pad='_'
 	_arpabet = ['@' + s for s in _phonemes_sorted]
 
 	# Export all symbols:
-	symbols = [pad, eos, bos] + list(characters) + _arpabet
+	_symbols = [pad, eos, bos] + list(characters) + _arpabet
 	_phonemes = [pad, eos, bos] + list(_phonemes_sorted) + list(punctuations)  # wjq use this
 
 	return _symbols, _phonemes
