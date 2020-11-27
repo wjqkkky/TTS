@@ -52,6 +52,8 @@
     "gradual_training": [[0, 7, 32], [1, 5, 32], [50000, 3, 32], [130000, 2, 16], [290000, 1, 16]], //set gradual training steps [first_step, r, batch_size]. If it is null, gradual training is disabled. For Tacotron, you might need to reduce the 'batch_size' as you proceeed.
     "loss_masking": true,         // enable / disable loss masking against the sequence padding.
     "ga_alpha": 10.0,        // weight for guided attention loss. If > 0, guided attention is enabled.
+    "diff_spec_alpha": 0.25,     // differential spectral loss weight. If > 0, it is enabled
+
 
     // VALIDATION
     "run_eval": true,
