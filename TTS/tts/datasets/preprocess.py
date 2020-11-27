@@ -198,7 +198,7 @@ def aishell_3(root_path, meta_file):
 				break
 			filename, text = line.split("|")
 			speaker_name = filename[:7]
-			wav_file = os.path.join(root_path, "wav", speaker_name, filename + ".wav")
+			wav_file = os.path.join(root_path, meta_file.split("/")[0], "wav", speaker_name, filename + ".wav")
 			items.append([text, wav_file, 'AISHELL_' + speaker_name])
 	return items
 
