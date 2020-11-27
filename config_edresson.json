@@ -54,6 +54,7 @@
     "ga_alpha": 10.0,        // weight for guided attention loss. If > 0, guided attention is enabled.
     "diff_spec_alpha": 0.25,     // differential spectral loss weight. If > 0, it is enabled
     "decoder_loss_alpha": 0.5,  // decoder loss weight. If > 0, it is enabled
+    "postnet_loss_alpha": 0.25, // postnet loss weight. If > 0, it is enabled
 
 
     // VALIDATION
