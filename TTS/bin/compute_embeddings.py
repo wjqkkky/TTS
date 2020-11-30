@@ -60,7 +60,7 @@ if args.target_dataset != '':
             "name": args.target_dataset,
             "path": args.data_path,
             "meta_file_train": "label.txt",
-            "meta_file_val": None
+            "meta_file_val": "test.txt"
         },
     ]
     wav_files, _ = load_meta_data(dataset_config, eval_split=False)
