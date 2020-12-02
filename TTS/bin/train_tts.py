@@ -425,11 +425,9 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 	if args.rank == 0 and epoch > c.test_delay_epochs:
 		if c.test_sentences_file is None:
 			test_sentences = [
-				"It took me quite a long time to develop a voice, and now that I have it I'm not going to be silent.",
-				"Be a voice, not an echo.",
-				"I'm sorry Dave. I'm afraid I can't do that.",
-				"This cake is great. It's so delicious and moist.",
-				"Prior to November 22, 1963."
+				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
+				"w o3 j in1 t ian1 c hi1 l e5 y i4 w an3 m i3 f an4",
+				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2"
 			]
 		else:
 			with open(c.test_sentences_file, "r") as f:

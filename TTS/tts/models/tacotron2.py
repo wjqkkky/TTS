@@ -148,7 +148,10 @@ class Tacotron2(TacotronAbstract):
 
         if self.num_speakers > 1:
             if not self.embeddings_per_sample:
+                print(11111111111)
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
+            print(self.embeddings_per_sample)
+            print(speaker_embeddings)
             encoder_outputs = self._concat_speaker_embedding(encoder_outputs, speaker_embeddings)
 
         decoder_outputs, alignments, stop_tokens = self.decoder.inference(

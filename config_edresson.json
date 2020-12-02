@@ -55,7 +55,7 @@
 
     // VALIDATION
     "run_eval": true,
-    "test_delay_epochs": 1,  //Until attention is aligned, testing only wastes computation time.
+    "test_delay_epochs": -1,  //Until attention is aligned, testing only wastes computation time.
     "test_sentences_file": null,  // set a file to load sentences to be used for testing. If it is null then we use default english sentences.
 
     // OPTIMIZER
@@ -129,7 +129,7 @@
     "freeze_postnet": false,
     "freeze_gst": false,
     "use_gst": true,       // TACOTRON ONLY: use global style tokens
-
+    "style_wav_for_test": "../style.wav",          // path to style wav file to be used in TacotronGST inference.
     "gst":	{			                // gst parameter if gst is enabled
         "gst_style_input": null,        // Condition the style input either on a
                                         // -> wave file [path to wave] or
