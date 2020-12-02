@@ -90,10 +90,10 @@ def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=
 	phonemes = text.strip().split()
 	for phoneme in phonemes:
 		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in _punctuations:
-			sequence += _phonemes_to_id[phoneme]
-			sequence += _phonemes_to_id[" "]
+			sequence.append(_phonemes_to_id[phoneme])
+			sequence.append(_phonemes_to_id[" "])
 		else:
-			sequence += _phonemes_to_id[phoneme]
+			sequence.append(_phonemes_to_id[phoneme])
 	# Append EOS char
 	if enable_eos_bos:
 		sequence = pad_with_eos_bos(sequence, tp=tp)
