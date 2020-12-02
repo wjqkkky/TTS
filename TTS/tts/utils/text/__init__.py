@@ -45,13 +45,13 @@ def text2phone(text, language):
 					ph = ph.replace('| |\n', '|' + punct + '| |', 1)
 	elif version.parse(phonemizer.__version__) >= version.parse('2.1'):
 		ph = phonemize(text, separator=seperator, strip=False, njobs=1, backend='espeak', language=language,
-					   preserve_punctuation=True)
+		               preserve_punctuation=True)
 		# this is a simple fix for phonemizer.
 		# https://github.com/bootphon/phonemizer/issues/32
 		if punctuations:
 			for punctuation in punctuations:
 				ph = ph.replace(f"| |{punctuation} ", f"|{punctuation}| |").replace(f"| |{punctuation}",
-																					f"|{punctuation}| |")
+				                                                                    f"|{punctuation}| |")
 			ph = ph[:-3]
 	else:
 		raise RuntimeError(" [!] Use 'phonemizer' version 2.1 or older.")
@@ -90,10 +90,10 @@ def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=
 	phonemes = text.strip().split()
 	for phoneme in phonemes:
 		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in _punctuations:
-			sequence += _phonemes_to_id(phoneme)
-			sequence += _phonemes_to_id(" ")
+			sequence += _phonemes_to_id[phoneme]
+			sequence += _phonemes_to_id[" "]
 		else:
-			sequence += _phonemes_to_id(phoneme)
+			sequence += _phonemes_to_id[phoneme]
 	# Append EOS char
 	if enable_eos_bos:
 		sequence = pad_with_eos_bos(sequence, tp=tp)
@@ -147,6 +147,8 @@ def text_to_sequence(text, cleaner_names, tp=None):
 			_clean_text(m.group(1), cleaner_names))
 		sequence += _arpabet_to_sequence(m.group(2))
 		text = m.group(3)
+	raise Exception("don't use this method")
+
 	return sequence
 
 
@@ -168,8 +170,9 @@ def sequence_to_text(sequence, tp=None):
 			result += s
 		else:
 			raise Exception("Unknown symbol id [{}]".format(symbol_id))
-	# return result.replace('}{', ' ')
-	return result
+	raise Exception("don't use this method")
+
+	return result.replace('}{', ' ')
 
 
 def _clean_text(text, cleaner_names):
