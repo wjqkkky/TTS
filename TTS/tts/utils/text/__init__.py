@@ -74,9 +74,9 @@ def pad_with_eos_bos(phoneme_sequence, tp=None):
 def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=None):
 	# pylint: disable=global-statement
 	global _phonemes_to_id
-	if tp:
-		_, _phonemes = make_symbols(**tp)
-		_phonemes_to_id = {s: i for i, s in enumerate(_phonemes)}
+	# if tp:
+	# 	_, _phonemes = make_symbols(**tp)
+	# 	_phonemes_to_id = {s: i for i, s in enumerate(_phonemes)}
 
 	sequence = []
 	# clean_text = _clean_text(text, cleaner_names)
@@ -90,10 +90,10 @@ def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=
 	phonemes = text.strip().split()
 	for phoneme in phonemes:
 		if phoneme[-1] in ["1", "2", "3", "4", "5"] or phoneme in _punctuations:
-			sequence += _phoneme_to_sequence(phoneme)
-			sequence += _phoneme_to_sequence(" ")
+			sequence += _phonemes_to_id(phoneme)
+			sequence += _phonemes_to_id(" ")
 		else:
-			sequence += _phoneme_to_sequence(phoneme)
+			sequence += _phonemes_to_id(phoneme)
 	# Append EOS char
 	if enable_eos_bos:
 		sequence = pad_with_eos_bos(sequence, tp=tp)
@@ -105,15 +105,16 @@ def sequence_to_phoneme(sequence, tp=None):
 	'''Converts a sequence of IDs back to a string'''
 	global _id_to_phonemes
 	result = ''
-	if tp:
-		_, _phonemes = make_symbols(**tp)
-		_id_to_phonemes = {i: s for i, s in enumerate(_phonemes)}
+	# if tp:
+	# 	_, _phonemes = make_symbols(**tp)
+	# 	_id_to_phonemes = {i: s for i, s in enumerate(_phonemes)}
 
 	for symbol_id in sequence:
 		if symbol_id in _id_to_phonemes:
 			s = _id_to_phonemes[symbol_id]
 			result += s
-	return result.replace('}{', ' ')
+	# return result.replace('}{', ' ')
+	return result
 
 
 def text_to_sequence(text, cleaner_names, tp=None):
