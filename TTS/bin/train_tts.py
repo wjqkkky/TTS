@@ -320,6 +320,8 @@ def train(model, criterion, optimizer, optimizer_st, scheduler,
 
 @torch.no_grad()
 def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
+	print("Strat evaluating...")
+	start_time = time.time()
 	data_loader = setup_loader(ap, model.decoder.r, is_val=True, speaker_mapping=speaker_mapping)
 	model.eval()
 	epoch_time = 0
@@ -421,8 +423,9 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 				eval_figures['alignment2'] = plot_alignment(align_b_img, output_fig=False)
 			tb_logger.tb_eval_stats(global_step, keep_avg.avg_values)
 			tb_logger.tb_eval_figures(global_step, eval_figures)
-
-	if args.rank == 0 and epoch > c.test_delay_epochs:
+	time_consuming = time.time() - start_time
+	print("End evaluating, time consuming {}s".format(round(time_consuming, 2)))
+	if args.rank == 0 and epoch > c.test_delay_epochs and epoch % c.test_interval_epochs == 0:
 		if c.test_sentences_file is None:
 			test_sentences = [
 				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
@@ -441,6 +444,8 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 		style_wav = c.get("style_wav_for_test")
 		for idx, test_sentence in enumerate(test_sentences):
 			try:
+				print("Start synthesising sentence{} ...".format(idx))
+				start_time = time.time()
 				speaker_embedding = speaker_mapping[list(speaker_mapping.keys())[0]]['embedding']
 				wav, alignment, decoder_output, postnet_output, stop_tokens, inputs = synthesis(
 					model,
@@ -456,6 +461,8 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 					do_trim_silence=False,
 					speaker_embedding=speaker_embedding)
 
+				time_consuming = time.time() - start_time
+				print("Sentence{} completed, time consuming {}s".format(idx, round(time_consuming, 2)))
 				file_path = os.path.join(AUDIO_PATH, str(global_step))
 				os.makedirs(file_path, exist_ok=True)
 				file_path = os.path.join(file_path,
