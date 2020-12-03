@@ -332,7 +332,6 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 			# format data
 			text_input, text_lengths, mel_input, mel_lengths, linear_input, stop_targets, speaker_ids, speaker_embeddings, _, _ = format_data(
 				data, speaker_mapping)
-			print(speaker_embeddings)
 			assert mel_input.shape[1] % model.decoder.r == 0
 
 			# forward pass model
@@ -439,10 +438,10 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 		test_figures = {}
 		print(" | > Synthesizing test sentences")
 		speaker_id = 0 if c.use_speaker_embedding else None
-		speaker_embeddings = speaker_embeddings(speaker_ids)[:, None]
 		style_wav = c.get("style_wav_for_test")
 		for idx, test_sentence in enumerate(test_sentences):
 			try:
+				speaker_embedding = speaker_mapping[list(speaker_mapping.keys())[0]]['embedding']
 				wav, alignment, decoder_output, postnet_output, stop_tokens, inputs = synthesis(
 					model,
 					test_sentence,
@@ -454,12 +453,13 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 					truncated=False,
 					enable_eos_bos_chars=c.enable_eos_bos_chars,  # pylint: disable=unused-argument
 					use_griffin_lim=True,
-					do_trim_silence=False)
+					do_trim_silence=False,
+					speaker_embedding=speaker_embedding)
 
 				file_path = os.path.join(AUDIO_PATH, str(global_step))
 				os.makedirs(file_path, exist_ok=True)
 				file_path = os.path.join(file_path,
-										 "TestSentence_{}.wav".format(idx))
+				                         "TestSentence_{}.wav".format(idx))
 				ap.save_wav(wav, file_path)
 				test_audios['{}-audio'.format(idx)] = wav
 				test_figures['{}-prediction'.format(idx)] = plot_spectrogram(
