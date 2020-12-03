@@ -425,7 +425,7 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 			tb_logger.tb_eval_figures(global_step, eval_figures)
 	time_consuming = time.time() - start_time
 	print("End evaluating, time consuming {}s".format(round(time_consuming, 2)))
-	if args.rank == 0 and epoch > c.test_delay_epochs and epoch % c.test_interval_epochs == 0:
+	if args.rank == 0 and epoch > c.test_delay_epochs and epoch % c.get("test_interval_epochs") == 0:
 		if c.test_sentences_file is None:
 			test_sentences = [
 				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
