@@ -147,7 +147,8 @@ class Tacotron2(TacotronAbstract):
             encoder_outputs = self.compute_gst(encoder_outputs, style_mel)
 
         if self.num_speakers > 1:
-            if not self.embeddings_per_sample:
+            # if not self.embeddings_per_sample:
+            if self.embeddings_per_sample:
                 print(11111111111)
                 speaker_embeddings = self.speaker_embedding(speaker_ids)[:, None]
             print(self.embeddings_per_sample)

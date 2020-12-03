@@ -426,7 +426,7 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 		if c.test_sentences_file is None:
 			test_sentences = [
 				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
-				"w o3 j in1 t ian1 c hi1 l e5 y i4 w an3 m i3 f an4",
+				"w o3 j in1 t ian1 ch i1 l e5 y i4 w an3 m i3 f an4",
 				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2"
 			]
 		else:
