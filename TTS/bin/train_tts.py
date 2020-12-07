@@ -133,6 +133,7 @@ def train(model, criterion, optimizer, optimizer_st, scheduler,
 	model.train()
 	epoch_time = 0
 	keep_avg = KeepAverage()
+	print("Training with {} audios.".format(len(data_loader.dataset)))
 	if use_cuda:
 		batch_n_iter = int(
 			len(data_loader.dataset) / (c.batch_size * num_gpus))
@@ -327,6 +328,8 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 	epoch_time = 0
 	keep_avg = KeepAverage()
 	c_logger.print_eval_start()
+	print("Evaluating with {} audios.".format(len(data_loader.dataset)))
+
 	if data_loader is not None:
 		for num_iter, data in enumerate(data_loader):
 			start_time = time.time()
