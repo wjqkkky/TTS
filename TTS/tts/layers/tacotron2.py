@@ -345,6 +345,7 @@ class Decoder(nn.Module):
             - alignments: (B, T_in, T_out)
             - stop_tokens: (B, T_out)
         """
+        # test_2
         memory = self.get_go_frame(inputs)
         memory = self._update_memory(memory)
 

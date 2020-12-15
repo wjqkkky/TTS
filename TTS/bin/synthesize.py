@@ -12,7 +12,7 @@ import torch
 
 from TTS.tts.utils.generic_utils import setup_model
 from TTS.tts.utils.synthesis import synthesis
-from TTS.tts.utils.text.symbols import make_symbols, phonemes, symbols
+from TTS.tts.utils.text.symbols import make_symbols, _phonemes, _symbols
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from TTS.vocoder.utils.generic_utils import setup_generator
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             speaker_embedding_dim = len(speaker_embedding)
 
     # load the model
-    num_chars = len(phonemes) if C.use_phonemes else len(symbols)
+    num_chars = len(_phonemes) if C.use_phonemes else len(_symbols)
     model = setup_model(num_chars, num_speakers, C, speaker_embedding_dim)
     cp = torch.load(args.model_path, map_location=torch.device('cpu'))
     model.load_state_dict(cp['model'])
@@ -166,6 +166,7 @@ if __name__ == "__main__":
             gst_style = args.gst_style
 
     wav = tts(model, vocoder_model, args.text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid, speaker_embedding=speaker_embedding, gst_style=gst_style)
+
 
     # save the results
     file_name = args.text.replace(" ", "_")

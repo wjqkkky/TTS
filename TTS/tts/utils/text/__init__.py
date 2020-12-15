@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import re
-from packaging import version
+
 import phonemizer
+from packaging import version
 from phonemizer.phonemize import phonemize
+
 from TTS.tts.utils.text import cleaners
 from TTS.tts.utils.text.symbols import make_symbols, _symbols, _phonemes, _phoneme_punctuations, _bos, \
 	_eos, _punctuations
@@ -71,7 +73,7 @@ def pad_with_eos_bos(phoneme_sequence, tp=None):
 	return [_phonemes_to_id[_bos]] + list(phoneme_sequence) + [_phonemes_to_id[_eos]]
 
 
-def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=False, tp=None):
+def phoneme_to_sequence(text, cleaner_names, language, enable_eos_bos=True, tp=None):
 	# pylint: disable=global-statement
 	global _phonemes_to_id
 	# if tp:

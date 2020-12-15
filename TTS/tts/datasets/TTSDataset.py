@@ -94,6 +94,7 @@ class MyDataset(Dataset):
 		return phonemes
 
 	def _load_or_generate_phoneme_sequence(self, wav_file, text):
+		# phone_1
 		file_name = os.path.splitext(os.path.basename(wav_file))[0]
 		cache_path = os.path.join(self.phoneme_cache_path,
 								  file_name + '_phoneme.npy')

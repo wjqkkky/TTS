@@ -23,6 +23,7 @@ from TTS.tts.utils.measures import alignment_diagonal_score
 from TTS.tts.utils.speakers import (get_speakers, load_speaker_mapping,
                                     save_speaker_mapping)
 from TTS.tts.utils.synthesis import synthesis
+from TTS.tts.utils.text import sequence_to_phoneme
 from TTS.tts.utils.text.symbols import make_symbols, _symbols, _phonemes
 from TTS.tts.utils.visual import plot_alignment, plot_spectrogram
 from TTS.utils.audio import AudioProcessor
@@ -71,7 +72,7 @@ def setup_loader(ap, r, is_val=False, verbose=False, speaker_mapping=None):
 			sampler=sampler,
 			num_workers=c.num_val_loader_workers
 			if is_val else c.num_loader_workers,
-			pin_memory=False)
+			pin_memory=True)
 	return loader
 
 
@@ -81,6 +82,8 @@ def format_data(data, speaker_mapping=None):
 
 	# setup input data
 	text_input = data[0]
+	for text in text_input:
+		print(sequence_to_phoneme(text.tolist()))
 	text_lengths = data[1]
 	speaker_names = data[2]
 	linear_input = data[3] if c.model in ["Tacotron"] else None
@@ -638,6 +641,7 @@ def main(args):  # pylint: disable=redefined-outer-name
 		                                         optimizer_st, scheduler, ap,
 		                                         global_step, epoch, amp,
 		                                         speaker_mapping)
+		# eval_1
 		eval_avg_loss_dict = evaluate(model, criterion, ap, global_step, epoch, speaker_mapping)
 		c_logger.print_epoch_end(epoch, eval_avg_loss_dict)
 		target_loss = train_avg_loss_dict['avg_postnet_loss']
