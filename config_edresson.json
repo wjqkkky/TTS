@@ -102,8 +102,8 @@
     // DATA LOADING
     "text_cleaner": "english_cleaners",
     "enable_eos_bos_chars": true, // enable/disable beginning of sentence and end of sentence chars.
-    "num_loader_workers": 4,        // number of training data loader processes. Don't set it too big. 4-8 are good values.
-    "num_val_loader_workers": 4,    // number of evaluation data loader processes.
+    "num_loader_workers": 6,        // number of training data loader processes. Don't set it too big. 4-8 are good values.
+    "num_val_loader_workers": 6,    // number of evaluation data loader processes.
     "batch_group_size": 0,  //Number of batches to shuffle after bucketing.
     "min_seq_len": 2,       // DATASET-RELATED: minimum text length to use in training
     "max_seq_len": 190,     // DATASET-RELATED: maximum text length
