@@ -82,8 +82,12 @@ def format_data(data, speaker_mapping=None):
 
 	# setup input data
 	text_input = data[0]
+	flag = 0
 	for text in text_input:
+		if flag > 0:
+			break
 		print(sequence_to_phoneme(text.tolist()))
+		flag += 1
 	text_lengths = data[1]
 	speaker_names = data[2]
 	linear_input = data[3] if c.model in ["Tacotron"] else None
