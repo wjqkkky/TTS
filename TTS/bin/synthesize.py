@@ -35,7 +35,7 @@ def tts(model, vocoder_model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid
     print(" > Run-time: {}".format(time.time() - t_1))
     print(" > Real-time factor: {}".format(rtf))
     print(" > Time per step: {}".format(tps))
-    return waveform
+    return waveform, mel_postnet_spec
 
 
 if __name__ == "__main__":
@@ -165,7 +165,7 @@ if __name__ == "__main__":
         except ValueError:
             gst_style = args.gst_style
 
-    wav = tts(model, vocoder_model, args.text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid, speaker_embedding=speaker_embedding, gst_style=gst_style)
+    wav, mel = tts(model, vocoder_model, args.text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid, speaker_embedding=speaker_embedding, gst_style=gst_style)
 
 
     # save the results
@@ -175,3 +175,4 @@ if __name__ == "__main__":
     out_path = os.path.join(args.out_path, file_name)
     print(" > Saving output to {}".format(out_path))
     ap.save_wav(wav, out_path)
+    torch.save(mel.T, file_name[:-4] + '_mel.pt')
