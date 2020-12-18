@@ -128,6 +128,8 @@ if __name__ == "__main__":
 			speaker_embedding_dim = len(speaker_embedding)
 
 	# load the model
+	print("Start loading Taco2 ...")
+	start_time = time.time()
 	num_chars = len(_phonemes) if C.use_phonemes else len(_symbols)
 	model = setup_model(num_chars, num_speakers, C, speaker_embedding_dim)
 	cp = torch.load(args.model_path, map_location=torch.device('cpu'))
@@ -136,6 +138,8 @@ if __name__ == "__main__":
 	if args.use_cuda:
 		model.cuda()
 	model.decoder.set_r(cp['r'])
+	time_consuming = time.time() - start_time
+	print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
 
 	# load vocoder model
 	if args.vocoder_path != "":
@@ -181,7 +185,8 @@ if __name__ == "__main__":
 			if not text:
 				break
 			text = text.strip()
-
+			start_time = time.time()
+			print("Start synthesizing sentence: [{}]".format(text))
 			wav, mel = tts(model, vocoder_model, text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid,
 			               speaker_embedding=speaker_embedding, gst_style=gst_style)
 
@@ -192,4 +197,6 @@ if __name__ == "__main__":
 			out_path = os.path.join(args.out_path, file_name)
 			ap.save_wav(wav, out_path)
 			torch.save(mel.T, out_path[:-4] + '_mel.pt')
-			print(" > Saving output to {}".format(out_path))
+			time_consuming = time.time() - start_time
+			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
+	print(" > Saving output to {}".format(out_path))
