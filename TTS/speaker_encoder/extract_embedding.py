@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 import torch
 from TTS.speaker_encoder.model import SpeakerEncoder
+from TTS.tts.utils.speakers import save_speaker_mapping
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 
@@ -78,7 +79,7 @@ model.eval()
 if args.use_cuda:
 	model.cuda()
 
-speaker_embeddings = []
+speaker_embeddings_list = []
 for idx, wav_file in enumerate(tqdm(wav_files)):
 	mel_spec = ap.melspectrogram(ap.load_wav(wav_file, ap.sample_rate)).T
 	mel_spec = torch.FloatTensor(mel_spec[None, :, :])
@@ -86,6 +87,12 @@ for idx, wav_file in enumerate(tqdm(wav_files)):
 		mel_spec = mel_spec.cuda()
 	embedd = model.compute_embedding(mel_spec)
 	# np.save(output_files[idx], embedd.detach().cpu().numpy())
-	speaker_embeddings.append(embedd)
-speaker_embedding = np.mean(np.array(speaker_embeddings), axis=0).tolist()
-print(speaker_embeddings)
+	speaker_embeddings_list.append(embedd.tolist())
+speaker_embedding = np.mean(np.array(speaker_embeddings_list), axis=0).tolist()
+
+speaker_mapping = {}
+wav_file_name = os.path.basename(wav_file)
+speaker_mapping[wav_file_name] = {}
+speaker_mapping[wav_file_name]['name'] = "jiang"
+speaker_mapping[wav_file_name]['embedding'] = speaker_embedding[0]
+save_speaker_mapping("json_out", speaker_mapping)
