@@ -78,10 +78,14 @@ model.eval()
 if args.use_cuda:
 	model.cuda()
 
+speaker_embeddings = []
 for idx, wav_file in enumerate(tqdm(wav_files)):
 	mel_spec = ap.melspectrogram(ap.load_wav(wav_file, ap.sample_rate)).T
 	mel_spec = torch.FloatTensor(mel_spec[None, :, :])
 	if args.use_cuda:
 		mel_spec = mel_spec.cuda()
 	embedd = model.compute_embedding(mel_spec)
-	np.save(output_files[idx], embedd.detach().cpu().numpy())
+	# np.save(output_files[idx], embedd.detach().cpu().numpy())
+	speaker_embeddings.append(embedd)
+speaker_embedding = np.mean(np.array(speaker_embeddings), axis=0).tolist()
+print(speaker_embeddings)
