@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
 	# synthesize voice
 	use_griffin_lim = args.vocoder_path == ""
-	print(" > Text: {}".format(args.text))
+	# print(" > Text: {}".format(args.text))
 
 	if not C.use_external_speaker_embedding_file:
 		if args.speaker_fileid.isdigit():
@@ -179,6 +179,9 @@ if __name__ == "__main__":
 		except ValueError:
 			gst_style = args.gst_style
 
+	if not os.path.exists(args.out_path):
+		os.mkdir(args.out_path)
+
 	with open(args.text_file, encoding="utf-8") as f:
 		while 1:
 			text = f.readline()
@@ -190,6 +193,8 @@ if __name__ == "__main__":
 			wav, mel = tts(model, vocoder_model, text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid,
 			               speaker_embedding=speaker_embedding, gst_style=gst_style)
 
+			time_consuming = time.time() - start_time
+			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
 			# save the results
 			file_name = text.replace(" ", "_")
 			file_name = file_name.translate(
@@ -197,6 +202,4 @@ if __name__ == "__main__":
 			out_path = os.path.join(args.out_path, file_name)
 			ap.save_wav(wav, out_path)
 			torch.save(mel.T, out_path[:-4] + '_mel.pt')
-			time_consuming = time.time() - start_time
-			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
 	print(" > Saving output to {}".format(out_path))
