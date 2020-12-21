@@ -95,4 +95,4 @@ wav_file_name = os.path.basename(wav_file)
 speaker_mapping[wav_file_name] = {}
 speaker_mapping[wav_file_name]['name'] = "jiang"
 speaker_mapping[wav_file_name]['embedding'] = speaker_embedding[0]
-save_speaker_mapping("json_out", speaker_mapping)
+save_speaker_mapping(args.output_path, speaker_mapping)
