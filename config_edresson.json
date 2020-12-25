@@ -62,7 +62,7 @@
     // OPTIMIZER
     "noam_schedule": false,        // use noam warmup and lr schedule.
     "grad_clip": 1.0,                // upper limit for gradients for clipping.
-    "epochs": 1000,                // total number of epochs to train.
+    "epochs": 3000,                // total number of epochs to train.
     "lr": 0.0001,                  // Initial learning rate. If Noam decay is active, maximum learning rate.
     "wd": 0.000001,         // Weight decay weight.
     "warmup_steps": 4000,          // Noam decay steps to increase the learning rate from 0 to "lr"
@@ -124,7 +124,7 @@
     "speaker_encoder_checkpoint_path": "../best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,     // use speaker embedding to enable multi-speaker learning.
     "use_external_speaker_embedding_file": true, // if true, forces the model to use external embedding per sample instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
-    "external_speaker_embedding_file": "../speaker_embeddings/speaker_train.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
+    "external_speaker_embedding_file": "jiang_embedding_all/speakers.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
     "freeze_encoder": false,
     "freeze_decoder": false,
     "freeze_postnet": false,
@@ -146,11 +146,11 @@
     "datasets":   // List of datasets. They all merged and they get different s$
         [
             {
-                "name": "aishell_3",
-                "path": "/data1/wangjiaqi/datasets/data1/wangjiaqi/datasets/AISHELL-3",
+                "name": "jiang",
+                "path": "/data1/wangjiaqi/datasets/autohome/jiangpeipei",
                 // para o teste no vctk eu escolhi 1 locutor de cada ACCEPTS,
-                "meta_file_train": "train/label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
-                "meta_file_val":"test/label.txt"
+                "meta_file_train": "label_train.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val":"label_test.txt"
             }
         ]
 
