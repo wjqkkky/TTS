@@ -11,6 +11,8 @@ from TTS.tts.utils.speakers import save_speaker_mapping
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 
+### 提取指定说话人的speaker_embedding
+
 parser = argparse.ArgumentParser(
 	description='Compute embedding vectors for each wav file in a dataset. ')
 parser.add_argument(
