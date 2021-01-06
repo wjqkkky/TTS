@@ -151,6 +151,13 @@
                 // para o teste no vctk eu escolhi 1 locutor de cada ACCEPTS,
                 "meta_file_train": "train/label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val":"test/label.txt"
+            },
+            {
+                "name": "private_data",
+                "path": "/data1/wangjiaqi/datasets/autohome",
+                // para o teste no vctk eu escolhi 1 locutor de cada ACCEPTS,
+                "meta_file_train": "label_train.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val":"label_test.txt"
             }
         ]
 

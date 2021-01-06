@@ -440,7 +440,9 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 			test_sentences = [
 				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
 				"w o3 j in1 t ian1 ch i1 l e5 y i4 w an3 m i3 f an4",
-				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2"
+				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2",
+				"y ou2 q i4 ch e1 zh i1 j ia1 j v3 b an4 d e5 d i4 er4 j ie4 b a1 y ao1 b a1 q van2 q iu2 ch ao1 j i2 ch e1 zh an3 b a1 y ve4 er4 sh i2 q i1 r i4 l uo4 m u4",
+				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5"
 			]
 		else:
 			with open(c.test_sentences_file, "r") as f:
@@ -456,7 +458,7 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 			try:
 				print("Start synthesising sentence{} ...".format(idx))
 				start_time = time.time()
-				speaker_embedding = speaker_mapping[list(speaker_mapping.keys())[333]]['embedding']
+				speaker_embedding = speaker_mapping["jiangpeipei_010200.wav"]['embedding']
 				print(speaker_embedding)
 				wav, alignment, decoder_output, postnet_output, stop_tokens, inputs = synthesis(
 					model,
