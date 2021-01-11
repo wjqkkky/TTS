@@ -459,7 +459,6 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 				print("Start synthesising sentence{} ...".format(idx))
 				start_time = time.time()
 				speaker_embedding = speaker_mapping["jiangpeipei_010200.wav"]['embedding']
-				print(speaker_embedding)
 				wav, alignment, decoder_output, postnet_output, stop_tokens, inputs = synthesis(
 					model,
 					test_sentence,

@@ -7,8 +7,8 @@ import json
 import os
 import string
 import time
-
 import torch
+import numpy as np
 
 from TTS.tts.utils.generic_utils import setup_model
 from TTS.tts.utils.synthesis import synthesis
@@ -98,6 +98,10 @@ if __name__ == "__main__":
 		'--gst_style',
 		help="Wav path file for GST stylereference.",
 		default=None)
+	parser.add_argument(
+		'--speaker_name',
+		help="Speaker name in speaker embedding file. Only used when CONFIG.use_external_speaker_embedding_file is true",
+		default=None)
 
 	args = parser.parse_args()
 
@@ -125,8 +129,14 @@ if __name__ == "__main__":
 				speaker_embedding = speaker_mapping[args.speaker_fileid]['embedding']
 			else:  # if speaker_fileid is not specificated use the first sample in speakers.json
 				speaker_embedding = speaker_mapping[list(speaker_mapping.keys())[0]]['embedding']
-			speaker_embedding_dim = len(speaker_embedding)
-
+		if args.speaker_name:
+			speaker_embeddings = []
+			for key in list(speaker_mapping.keys()):
+				if args.speaker_name == speaker_mapping[key]['name']:
+					speaker_embeddings.append(speaker_mapping[key]['embedding'])
+			# takes the average of the embedings samples of the announcers
+			speaker_embedding = np.mean(np.array(speaker_embeddings), axis=0).tolist()
+		speaker_embedding_dim = len(speaker_embedding)
 	# load the model
 	print("Start loading Taco2 ...")
 	start_time = time.time()
