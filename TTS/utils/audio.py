@@ -11,7 +11,7 @@ from TTS.tts.utils.data import StandardScaler
 class AudioProcessor(object):
     def __init__(self,
                  sample_rate=None,
-                 resample=False,
+                 resample=True,
                  num_mels=None,
                  min_level_db=None,
                  frame_shift_ms=None,
