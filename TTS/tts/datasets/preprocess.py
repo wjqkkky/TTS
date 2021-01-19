@@ -227,7 +227,7 @@ def m2voc(root_path, meta_file):
 				if not line:
 					break
 				filename, text = line.split("|")
-				speaker_name = filename.split("_")[0]
+				speaker_name, filename = filename.split("_")[0]
 				assert speaker == speaker_name
 				wav_file = os.path.join(root_path, speaker, "wavs", filename + ".wav")
 				items.append([text, wav_file, 'm2voc_' + speaker_name])
