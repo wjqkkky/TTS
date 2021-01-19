@@ -217,6 +217,23 @@ def private_data(root_path, meta_file):
 	return items
 
 
+def m2voc(root_path, meta_file):
+	items = []
+	speakers = os.listdir(root_path)
+	for speaker in speakers:
+		with open(os.path.join(root_path, speaker, meta_file), "r", encoding="utf-8") as f:
+			while 1:
+				line = f.readline()
+				if not line:
+					break
+				filename, text = line.split("|")
+				speaker_name = filename.split("_")[0]
+				assert speaker == speaker_name
+				wav_file = os.path.join(root_path, speaker, "wavs", filename + ".wav")
+				items.append([text, wav_file, 'm2voc_' + speaker_name])
+	return items
+
+
 def jiang(root_path, meta_file):
 	items = []
 	with open(os.path.join(root_path, meta_file), "r", encoding="utf-8") as f:
