@@ -82,6 +82,7 @@ def format_test_data(data):
 def train(model, criterion, optimizer,
           scheduler, scaler, ap, global_step, epoch):
     data_loader = setup_loader(ap, is_val=False, verbose=(epoch == 0))
+    print(" > Train with {} audios.".format(len(data_loader.dataset)))
     model.train()
     epoch_time = 0
     keep_avg = KeepAverage()
