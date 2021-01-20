@@ -100,7 +100,11 @@ model.load_state_dict(torch.load(args.model_path)['model'])
 model.eval()
 if args.use_cuda:
 	model.cuda()
-
+# check if all the files exist
+for idx, wav_file in enumerate(tqdm(wav_files)):
+	wav_file = wav_file[1]
+	if not os.path.exists(wav_file):
+		raise FileNotFoundError(wav_file)
 # compute speaker embeddings
 speaker_mapping = {}
 for idx, wav_file in enumerate(tqdm(wav_files)):
