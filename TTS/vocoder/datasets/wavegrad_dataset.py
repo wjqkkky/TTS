@@ -79,7 +79,7 @@ class WaveGradDataset(Dataset):
         if self.use_cache and self.cache[idx] is not None:
             audio = self.cache[idx]
         else:
-            audio = self.ap.load_wav(wavpath)
+            audio = self.ap.load_wav(wavpath, self.ap.sample_rate)
 
             if self.return_segments:
                 # correct audio length wrt segment length
