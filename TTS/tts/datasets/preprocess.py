@@ -227,7 +227,7 @@ def m2voc(root_path, meta_file):
 				if not line:
 					break
 				filename, text = line.split("|")
-				speaker_name, filename = filename.split("_")
+				speaker_name, _ = filename.split("_")
 				assert speaker == speaker_name
 				wav_file = os.path.join(root_path, speaker, "wavs", filename + ".wav")
 				items.append([text, wav_file, 'm2voc_' + speaker_name])
@@ -247,6 +247,7 @@ def jiang(root_path, meta_file):
 			items.append([text, wav_file, speaker_name])
 	return items
 
+
 def baker(root_path, meta_file):
 	txt_file = os.path.join(root_path, meta_file)
 	items = []
@@ -258,6 +259,7 @@ def baker(root_path, meta_file):
 			text = cols[1]
 			items.append([text, wav_file, speaker_name])
 	return items
+
 
 def custom_turkish(root_path, meta_file):
 	txt_file = os.path.join(root_path, meta_file)
