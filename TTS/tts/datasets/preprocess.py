@@ -247,6 +247,17 @@ def jiang(root_path, meta_file):
 			items.append([text, wav_file, speaker_name])
 	return items
 
+def baker(root_path, meta_file):
+	txt_file = os.path.join(root_path, meta_file)
+	items = []
+	speaker_name = "baker"
+	with open(txt_file, 'r') as ttf:
+		for line in ttf:
+			cols = line.split('|')
+			wav_file = os.path.join(root_path, 'wavs', cols[0] + '.wav')
+			text = cols[1]
+			items.append([text, wav_file, speaker_name])
+	return items
 
 def custom_turkish(root_path, meta_file):
 	txt_file = os.path.join(root_path, meta_file)

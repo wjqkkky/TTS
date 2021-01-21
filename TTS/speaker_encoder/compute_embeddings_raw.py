@@ -10,7 +10,7 @@ from TTS.speaker_encoder.model import SpeakerEncoder
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from TTS.tts.utils.speakers import save_speaker_mapping
-from TTS.tts.datasets.preprocess import load_meta_data
+from TTS.tts.datasets.preprocess import load_meta_data, get_preprocessor_by_name
 
 parser = argparse.ArgumentParser(
 	description='Compute embedding vectors for each wav file in a dataset. If "target_dataset" is defined, it generates "speakers.json" necessary for training a multi-speaker model.')
@@ -62,7 +62,19 @@ if args.target_dataset != '':
 			"meta_file_val": None
 		},
 	]
-	wav_files, _ = load_meta_data(dataset_config)
+
+	meta_data_train_all = []
+	for dataset in dataset_config:
+		name = dataset['name']
+		root_path = dataset['path']
+		meta_file_train = dataset['meta_file_train']
+		meta_file_val = dataset['meta_file_val']
+		preprocessor = get_preprocessor_by_name(name)
+
+		meta_data_train = preprocessor(root_path, meta_file_train)
+		meta_data_train_all += meta_data_train
+
+	wav_files = meta_data_train_all
 	output_files = [wav_file[1].replace(data_path, args.output_path).replace(
 		'.wav', '.npy') for wav_file in wav_files]
 else:
