@@ -274,6 +274,19 @@ def niuman(root_path, meta_file):
 	return items
 
 
+def haitian(root_path, meta_file):
+	txt_file = os.path.join(root_path, meta_file)
+	items = []
+	speaker_name = "haitian031"
+	with open(txt_file, 'r') as ttf:
+		for line in ttf:
+			cols = line.split('|')
+			wav_file = os.path.join(root_path, 'wavs_multi', cols[0] + '.wav')
+			text = cols[1]
+			items.append([text, wav_file, speaker_name])
+	return items
+
+
 def custom_turkish(root_path, meta_file):
 	txt_file = os.path.join(root_path, meta_file)
 	items = []
