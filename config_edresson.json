@@ -160,19 +160,19 @@
             {
                 "name": "m2voc",
                 "path": "/data1/wangjiaqi/datasets/M2VoC_MST_and_TSV_data",
-                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "biaobei",
                 "path": "/data1/wangjiaqi/datasets/biaobei",
-                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "haitian",
                 "path": "/data1/wangjiaqi/datasets/HaiTian-031",
-                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             }
         ]
