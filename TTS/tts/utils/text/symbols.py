@@ -27,7 +27,7 @@ _pad = '_'
 _eos = '~'
 _bos = '^'
 _characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!\'(),-.:;? '
-_punctuations = '/ '  # wjq use this
+_punctuations = '-/ '  # wjq use this
 _phoneme_punctuations = '.!;:,?'
 
 # Phonemes definition
