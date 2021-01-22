@@ -148,12 +148,6 @@ def train(model, criterion, optimizer, optimizer_st, scheduler,
 		batch_n_iter = int(len(data_loader.dataset) / c.batch_size)
 	end_time = time.time()
 	c_logger.print_train_start()
-	# check if all phones in phone_list
-	for num_iter, data in enumerate(data_loader):
-		# format data
-		text_input, text_lengths, mel_input, mel_lengths, linear_input, stop_targets, speaker_ids, speaker_embeddings, avg_text_length, avg_spec_length = format_data(
-			data, speaker_mapping)
-		print(text_input)
 
 	for num_iter, data in enumerate(data_loader):
 		start_time = time.time()
