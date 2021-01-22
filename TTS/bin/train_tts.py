@@ -148,6 +148,13 @@ def train(model, criterion, optimizer, optimizer_st, scheduler,
 		batch_n_iter = int(len(data_loader.dataset) / c.batch_size)
 	end_time = time.time()
 	c_logger.print_train_start()
+	# check if all phones in phone_list
+	for num_iter, data in enumerate(data_loader):
+		# format data
+		text_input, text_lengths, mel_input, mel_lengths, linear_input, stop_targets, speaker_ids, speaker_embeddings, avg_text_length, avg_spec_length = format_data(
+			data, speaker_mapping)
+		print(text_input)
+
 	for num_iter, data in enumerate(data_loader):
 		start_time = time.time()
 
@@ -439,10 +446,12 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 		if c.test_sentences_file is None:
 			test_sentences = [
 				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
-				"w o3 j in1 t ian1 ch i1 l e5 y i4 w an3 m i3 f an4",
+				"r ong2 w ei1 q i4 ch e1 z ai4 j in1 t ian1 sh ang4 sh i4 l e5 x in1 k uan3 r ong2 w ei1 / AA1 R / EH1 K S / w u3 / M AE1 K S / y i1 d ian3 w u3 / T IY1 / ch e1 x ing2",
 				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2",
 				"y ou2 q i4 ch e1 zh i1 j ia1 j v3 b an4 d e5 d i4 er4 j ie4 b a1 y ao1 b a1 q van2 q iu2 ch ao1 j i2 ch e1 zh an3 b a1 y ve4 er4 sh i2 q i1 r i4 l uo4 m u4",
-				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5"
+				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5",
+				"sh i3 sh ang4 z ui4 q van2 d e5 / L IH1 N AH0 K S / ch ang2 y ong4 m ing4 l ing4 h ui4 z ong3",
+				"L IY1 G / AH1 V / L EH1 JH AH0 N D / y ing1 x iong2 l ian2 m eng2 d e5 y ing1 w en2 sh i4 / L IY1 G / AH1 V / L EH1 JH AH0 N D Z j ian3 ch eng1 / EH1 L / OW1 / EH1 L"
 			]
 		else:
 			with open(c.test_sentences_file, "r") as f:

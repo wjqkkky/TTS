@@ -11,21 +11,21 @@ from TTS.tts.utils.data import prepare_data, prepare_tensor, prepare_stop_target
 
 class MyDataset(Dataset):
 	def __init__(self,
-				 outputs_per_step,
-				 text_cleaner,
-				 compute_linear_spec,
-				 ap,
-				 meta_data,
-				 tp=None,
-				 batch_group_size=0,
-				 min_seq_len=0,
-				 max_seq_len=float("inf"),
-				 use_phonemes=True,
-				 phoneme_cache_path=None,
-				 phoneme_language="en-us",
-				 enable_eos_bos=False,
-				 speaker_mapping=None,
-				 verbose=False):
+	             outputs_per_step,
+	             text_cleaner,
+	             compute_linear_spec,
+	             ap,
+	             meta_data,
+	             tp=None,
+	             batch_group_size=0,
+	             min_seq_len=0,
+	             max_seq_len=float("inf"),
+	             use_phonemes=True,
+	             phoneme_cache_path=None,
+	             phoneme_language="en-us",
+	             enable_eos_bos=False,
+	             speaker_mapping=None,
+	             verbose=False):
 		"""
 		Args:
 			outputs_per_step (int): number of time frames predicted per step.
@@ -72,7 +72,7 @@ class MyDataset(Dataset):
 		self.sort_items()
 
 	def load_wav(self, filename, sample_rate):
-		audio = self.ap.load_wav(filename)
+		audio = self.ap.load_wav(filename, self.ap.sample_rate)
 		return audio
 
 	@staticmethod
@@ -86,9 +86,9 @@ class MyDataset(Dataset):
 		eos chars here. Instead we add those dynamically later; based on the
 		config option."""
 		phonemes = phoneme_to_sequence(text, [self.cleaners],
-									   language=self.phoneme_language,
-									   enable_eos_bos=False,
-									   tp=self.tp)
+		                               language=self.phoneme_language,
+		                               enable_eos_bos=False,
+		                               tp=self.tp)
 		phonemes = np.asarray(phonemes, dtype=np.int32)
 		np.save(cache_path, phonemes)
 		return phonemes
@@ -97,17 +97,17 @@ class MyDataset(Dataset):
 		# phone_1
 		file_name = os.path.splitext(os.path.basename(wav_file))[0]
 		cache_path = os.path.join(self.phoneme_cache_path,
-								  file_name + '_phoneme.npy')
+		                          file_name + '_phoneme.npy')
 		try:
 			phonemes = np.load(cache_path)
 		except FileNotFoundError:
 			phonemes = self._generate_and_cache_phoneme_sequence(text,
-																 cache_path)
+			                                                     cache_path)
 		except (ValueError, IOError):
 			print(" > ERROR: failed loading phonemes for {}. "
-				  "Recomputing.".format(wav_file))
+			      "Recomputing.".format(wav_file))
 			phonemes = self._generate_and_cache_phoneme_sequence(text,
-																 cache_path)
+			                                                     cache_path)
 		if self.enable_eos_bos:
 			phonemes = pad_with_eos_bos(phonemes, tp=self.tp)
 			phonemes = np.asarray(phonemes, dtype=np.int32)
@@ -197,7 +197,7 @@ class MyDataset(Dataset):
 			text = [batch[idx]['text'] for idx in ids_sorted_decreasing]
 
 			speaker_name = [batch[idx]['speaker_name']
-							for idx in ids_sorted_decreasing]
+			                for idx in ids_sorted_decreasing]
 			# get speaker embeddings
 			if self.speaker_mapping is not None:
 				wav_files_names = [batch[idx]['wav_file_name'] for idx in ids_sorted_decreasing]
@@ -216,7 +216,7 @@ class MyDataset(Dataset):
 
 			# PAD stop targets
 			stop_targets = prepare_stop_target(stop_targets,
-											   self.outputs_per_step)
+			                                   self.outputs_per_step)
 
 			# PAD sequences with longest instance in the batch
 			text = prepare_data(text).astype(np.int32)
@@ -247,7 +247,7 @@ class MyDataset(Dataset):
 			else:
 				linear = None
 			return text, text_lenghts, speaker_name, linear, mel, mel_lengths, \
-				   stop_targets, item_idxs, speaker_embedding
+			       stop_targets, item_idxs, speaker_embedding
 
 		raise TypeError(("batch must contain tensors, numbers, dicts or lists;\
                          found {}".format(type(batch[0]))))

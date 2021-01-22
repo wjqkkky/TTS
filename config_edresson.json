@@ -113,7 +113,7 @@
     "output_path": "../checkpoints/training/",
 
     // PHONEMES
-    "phoneme_cache_path": "../aishell_3_phonemes/",  // phoneme computation is slow, therefore, it caches results in the given folder.
+    "phoneme_cache_path": "../phonemes/",  // phoneme computation is slow, therefore, it caches results in the given folder.
     "use_phonemes": true,           // use phonemes instead of raw characters. It is suggested for better pronounciation.
     "phoneme_language": "en",     // depending on your target language, pick one from  https://github.com/bootphon/phonemizer#languages
 
@@ -124,7 +124,7 @@
     "speaker_encoder_checkpoint_path": "../best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,     // use speaker embedding to enable multi-speaker learning.
     "use_external_speaker_embedding_file": true, // if true, forces the model to use external embedding per sample instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
-    "external_speaker_embedding_file": "../speaker_embeddings/speaker_train.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
+    "external_speaker_embedding_file": "../speaker_embeddings/speakers_all.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
     "freeze_encoder": false,
     "freeze_decoder": false,
     "freeze_postnet": false,
@@ -146,19 +146,34 @@
     "datasets":   // List of datasets. They all merged and they get different s$
         [
             {
-                "name": "aishell_3",
-                "path": "/data1/wangjiaqi/datasets/data1/wangjiaqi/datasets/AISHELL-3",
-                // para o teste no vctk eu escolhi 1 locutor de cada ACCEPTS,
-                "meta_file_train": "train/label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
-                "meta_file_val":"test/label.txt"
+                "name": "niuman",
+                "path": "/data1/wangjiaqi/datasets/new_man_data_all",
+                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
             },
             {
                 "name": "private_data",
                 "path": "/data1/wangjiaqi/datasets/autohome",
-                // para o teste no vctk eu escolhi 1 locutor de cada ACCEPTS,
-                "meta_file_train": "label_train.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
-                "meta_file_val":"label_test.txt"
+                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
+            },
+            {
+                "name": "m2voc",
+                "path": "/data1/wangjiaqi/datasets/M2VoC_MST_and_TSV_data",
+                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
+            },
+            {
+                "name": "biaobei",
+                "path": "/data1/wangjiaqi/datasets/biaobei",
+                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
+            },
+            {
+                "name": "haitian",
+                "path": "/data1/wangjiaqi/datasets/HaiTian-031",
+                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
             }
         ]
-
 }

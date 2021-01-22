@@ -5,10 +5,11 @@ Defines the set of symbols used in text input to the model.
 The default is a set of ASCII characters that works well for English or text that has been run
 through Unidecode. For other data, you can modify _characters. See TRAINING_DATA.md for details.
 '''
+from TTS.tts.utils.text.cmudict import VALID_SYMBOLS
 
 
 def make_symbols(characters, phonemes_list, punctuations='!\'(),-.:;? ', pad='_', eos='~',
-				 bos='^'):  # pylint: disable=redefined-outer-name
+                 bos='^'):  # pylint: disable=redefined-outer-name
 	''' Function to create symbols and phonemes '''
 	_phonemes_sorted = sorted(phonemes_list)
 
@@ -17,7 +18,7 @@ def make_symbols(characters, phonemes_list, punctuations='!\'(),-.:;? ', pad='_'
 
 	# Export all symbols:
 	_symbols = [pad, eos, bos] + list(characters) + _arpabet
-	_phonemes = [pad, eos, bos] + list(_phonemes_sorted) + list(punctuations)  # wjq use this
+	_phonemes = [pad, eos, bos] + list(_phonemes_sorted) + list(punctuations) + VALID_SYMBOLS  # wjq use this
 
 	return _symbols, _phonemes
 
@@ -26,7 +27,7 @@ _pad = '_'
 _eos = '~'
 _bos = '^'
 _characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!\'(),-.:;? '
-_punctuations = '.?!, '  # wjq use this
+_punctuations = ' '  # wjq use this
 _phoneme_punctuations = '.!;:,?'
 
 # Phonemes definition
