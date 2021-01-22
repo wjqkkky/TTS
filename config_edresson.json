@@ -164,7 +164,7 @@
                 "meta_file_val": null
             },
             {
-                "name": "biaobei",
+                "name": "baker",
                 "path": "/data1/wangjiaqi/datasets/biaobei",
                 "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
