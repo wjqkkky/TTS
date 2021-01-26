@@ -6,12 +6,12 @@ import argparse
 import os
 import string
 import time
-import torchaudio
+
 import numpy as np
 import torch
+import torchaudio
 
 from TTS.tts.utils.synthesis import synthesis
-from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from TTS.vocoder.utils.generic_utils import setup_generator
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument(
-		'out_path',
+		'output_path',
 		type=str,
 		help='Path to save final wav file. Wav file will be names as the text given.',
 	)
