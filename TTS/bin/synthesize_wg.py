@@ -12,6 +12,7 @@ import torch
 import torchaudio
 
 from TTS.tts.utils.synthesis import synthesis
+from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from TTS.vocoder.utils.generic_utils import setup_generator
 
@@ -64,10 +65,10 @@ def synthesis(mel):
 	t_1 = time.time()
 	beta = np.linspace(1e-6, 0.01, 50)
 	vocoder_model.compute_noise_level(beta)
-	waveform = vocoder_model.inference(torch.FloatTensor(mel.T).to("cuda").unsqueeze(0))
+	waveform = vocoder_model.inference(torch.FloatTensor(mel).to("cuda").unsqueeze(0))
 	waveform = waveform.cpu().numpy()
 	waveform = waveform.squeeze()
-	rtf = (time.time() - t_1) / (len(waveform) / 22050)
+	rtf = (time.time() - t_1) / (len(waveform) / ap.sample_rate)
 	tps = (time.time() - t_1) / len(waveform)
 	print(" > Run-time: {}".format(time.time() - t_1))
 	print(" > Real-time factor: {}".format(rtf))
@@ -83,6 +84,9 @@ if __name__ == "__main__":
 		type=str,
 		help='Path to save final wav file. Wav file will be names as the text given.',
 	)
+	parser.add_argument('config_path',
+	                    type=str,
+	                    help='Path to model config file.')
 	parser.add_argument('--use_cuda',
 	                    type=bool,
 	                    help='Run model on CUDA.',
@@ -109,10 +113,16 @@ if __name__ == "__main__":
 		help="",
 		default=True)
 
-
 	args = parser.parse_args()
 	if not os.path.exists(args.output_path):
 		os.mkdir(args.output_path)
+
+	C = load_config(args.config_path)
+	C.forward_attn_mask = True
+
+	# load the audio processor
+	ap = AudioProcessor(**C.audio)
+
 	start_time = time.time()
 	# load vocoder model
 	if args.vocoder_path != "":
@@ -134,8 +144,8 @@ if __name__ == "__main__":
 			start_time = time.time()
 			print(" > Start inferencing sentence {} . ".format(mel_file))
 			spectrogram = torch.tensor(torch.load(os.path.join(args.spectrogram_path, mel_file)))
-			audio, sr = synthesis(spectrogram)
-			wav_name = os.path.join(args.output_path, mel_file[:-7] + "_wg.wav")
-			torchaudio.save(wav_name, audio.cpu(), sample_rate=sr)
+			audio= synthesis(spectrogram)
+			out_wav_name = os.path.join(args.output_path, mel_file[:-7] + "_wg.wav")
+			ap.save_wav(audio, out_wav_name)
 			time_consuming = time.time() - start_time
 			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
