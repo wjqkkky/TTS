@@ -105,7 +105,7 @@ if __name__ == "__main__":
 		default=True)
 	parser.add_argument(
 		'--spectrogram_path',
-		type=bool,
+		type=str,
 		help="",
 		default=True)
 
