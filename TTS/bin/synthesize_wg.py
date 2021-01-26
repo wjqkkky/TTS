@@ -103,6 +103,12 @@ if __name__ == "__main__":
 		type=bool,
 		help="If True, vocoder model uses faster batch processing.",
 		default=True)
+	parser.add_argument(
+		'--spectrogram_path',
+		type=bool,
+		help="",
+		default=True)
+
 
 	args = parser.parse_args()
 	if not os.path.exists(args.output_path):
