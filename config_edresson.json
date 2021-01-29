@@ -34,6 +34,7 @@
         "spec_gain": 20.0,
         "do_trim_silence": true,  // enable trimming of slience of audio as you load it. LJspeech (false), TWEB (false), Nancy (true)
         "trim_db": 30          // threshold for timming silence. Set this according to your dataset.
+        "do_sound_norm": true
     },
 
 
@@ -147,32 +148,38 @@
         [
             {
                 "name": "niuman",
-                "path": "/data1/wangjiaqi/datasets/new_man_data_all",
-                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "path": "/data2/wangjiaqi/datasets/new_man_data_all",
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "private_data",
-                "path": "/data1/wangjiaqi/datasets/autohome",
+                "path": "/data2/wangjiaqi/datasets/autohome",
                 "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "m2voc",
-                "path": "/data1/wangjiaqi/datasets/M2VoC_MST_and_TSV_data",
-                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "path": "/data2/wangjiaqi/datasets/M2VoC_MST_and_TSV_data",
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "baker",
-                "path": "/data1/wangjiaqi/datasets/biaobei",
-                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "path": "/data2/wangjiaqi/datasets/biaobei",
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
                 "name": "haitian",
-                "path": "/data1/wangjiaqi/datasets/HaiTian-031",
-                "meta_file_train": "label.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "path": "/data2/wangjiaqi/datasets/HaiTian-031",
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_val": null
+            },
+            {
+                "name": "ljspeech",
+                "path": "/data2/wangjiaqi/datasets/LJSpeech-1.1",
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             }
         ]

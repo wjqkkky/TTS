@@ -445,7 +445,8 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 				"y ou2 q i4 ch e1 zh i1 j ia1 j v3 b an4 d e5 d i4 er4 j ie4 b a1 y ao1 b a1 q van2 q iu2 ch ao1 j i2 ch e1 zh an3 b a1 y ve4 er4 sh i2 q i1 r i4 l uo4 m u4",
 				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5",
 				"sh i3 sh ang4 z ui4 q van2 d e5 / L IH1 N AH0 K S / ch ang2 y ong4 m ing4 l ing4 h ui4 z ong3",
-				"L IY1 G / AH1 V / L EH1 JH AH0 N D / y ing1 x iong2 l ian2 m eng2 d e5 y ing1 w en2 sh i4 / L IY1 G / AH1 V / L EH1 JH AH0 N D Z j ian3 ch eng1 / EH1 L / OW1 / EH1 L"
+				"L IY1 G / AH1 V / L EH1 JH AH0 N D / y ing1 x iong2 l ian2 m eng2 d e5 y ing1 w en2 sh i4 / L IY1 G / AH1 V / L EH1 JH AH0 N D Z",
+				"sh en1 w ei2 s an1 b en3 d e5 w o3 j iu4 sh i4 p ing2 j ie4 zh e4 x ie1 q ian2 d uan1 m ian4 sh i4 t i2 n a2 d ao4 b ai3 d u4 j ing1 d ong1 / AO1 F ER0 / d e5"
 			]
 		else:
 			with open(c.test_sentences_file, "r") as f:
