@@ -439,14 +439,15 @@ def evaluate(model, criterion, ap, global_step, epoch, speaker_mapping=None):
 	if args.rank == 0 and epoch > c.test_delay_epochs and epoch % c.get("test_interval_epochs") == 0:
 		if c.test_sentences_file is None:
 			test_sentences = [
-				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1",
-				"r ong2 w ei1 q i4 ch e1 z ai4 j in1 t ian1 sh ang4 sh i4 l e5 x in1 k uan3 r ong2 w ei1 / AA1 R / EH1 K S / w u3 / M AE1 K S / y i1 d ian3 w u3 / T IY1 / ch e1 x ing2",
-				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2",
-				"y ou2 q i4 ch e1 zh i1 j ia1 j v3 b an4 d e5 d i4 er4 j ie4 b a1 y ao1 b a1 q van2 q iu2 ch ao1 j i2 ch e1 zh an3 b a1 y ve4 er4 sh i2 q i1 r i4 l uo4 m u4",
-				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5",
-				"sh i3 sh ang4 z ui4 q van2 d e5 / L IH1 N AH0 K S / ch ang2 y ong4 m ing4 l ing4 h ui4 z ong3",
-				"L IY1 G / AH1 V / L EH1 JH AH0 N D / y ing1 x iong2 l ian2 m eng2 d e5 y ing1 w en2 sh i4 / L IY1 G / AH1 V / L EH1 JH AH0 N D Z",
-				"sh en1 w ei2 s an1 b en3 d e5 w o3 j iu4 sh i4 p ing2 j ie4 zh e4 x ie1 q ian2 d uan1 m ian4 sh i4 t i2 n a2 d ao4 b ai3 d u4 j ing1 d ong1 / AO1 F ER0 / d e5"
+				"h uan1 y ing2 zh i4 d ian4 q i4 ch e1 zh i1 j ia1 #3",
+				"r ong2 w ei1 q i4 ch e1 z ai4 j in1 t ian1 sh ang4 sh i4 l e5 x in1 k uan3 r ong2 w ei1 / AA1 R / EH1 K S / w u3 / M AE1 K S / y i1 d ian3 w u3 / T IY1 / ch e1 x ing2 #3",
+				"k an4 d ao4 n in2 y ou3 z ai4 w ang3 sh ang4 g uan1 zh u4 w o4 er3 w o4 zh e4 g e5 p in3 p ai2 #3",
+				"y ou2 q i4 ch e1 zh i1 j ia1 j v3 b an4 d e5 d i4 er4 j ie4 b a1 y ao1 b a1 q van2 q iu2 ch ao1 j i2 ch e1 zh an3 b a1 y ve4 er4 sh i2 q i1 r i4 l uo4 m u4 #3",
+				"n in2 d a3 s uan4 z ai4 sh en2 m e5 sh i2 j ian1 m ai3 ch e1 n e5 #3",
+				"sh i3 sh ang4 z ui4 q van2 d e5 / L IH1 N AH0 K S / ch ang2 y ong4 m ing4 l ing4 h ui4 z ong3 #3",
+				"L IY1 G / AH1 V / L EH1 JH AH0 N D / y ing1 x iong2 l ian2 m eng2 d e5 y ing1 w en2 sh i4 / L IY1 G / AH1 V / L EH1 JH AH0 N D Z #3",
+				"sh en1 w ei2 s an1 b en3 d e5 w o3 j iu4 sh i4 p ing2 j ie4 zh e4 x ie1 q ian2 d uan1 m ian4 sh i4 t i2 n a2 d ao4 b ai3 d u4 j ing1 d ong1 / AO1 F ER0 / d e5 #3",
+				"AY1 / R IH0 F Y UW1 Z / T UW1 / K AH0 L EH1 K T / DH AH0 / R EH1 F Y UW2 Z / ER0 AW1 N D / HH IY1 R #3"
 			]
 		else:
 			with open(c.test_sentences_file, "r") as f:
