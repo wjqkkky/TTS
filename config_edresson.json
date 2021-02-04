@@ -125,7 +125,7 @@
     "speaker_encoder_checkpoint_path": "../best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,     // use speaker embedding to enable multi-speaker learning.
     "use_external_speaker_embedding_file": true, // if true, forces the model to use external embedding per sample instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
-    "external_speaker_embedding_file": "../../speaker_embeddings/speakers_all.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
+    "external_speaker_embedding_file": "../../speaker_embeddings/speakers_all_eng.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
     "freeze_encoder": false,
     "freeze_decoder": false,
     "freeze_postnet": false,
