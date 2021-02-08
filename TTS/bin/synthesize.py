@@ -193,6 +193,7 @@ if __name__ == "__main__":
 		os.mkdir(args.out_path)
 
 	with open(args.text_file, encoding="utf-8") as f:
+		sentence_num = 0
 		while 1:
 			text = f.readline()
 			if not text:
@@ -209,7 +210,9 @@ if __name__ == "__main__":
 			file_name = text.replace(" ", "_")
 			file_name = file_name.translate(
 				str.maketrans('', '', string.punctuation.replace('_', ''))) + '.wav'
+			file_name = "{}_{}".format(sentence_num, file_name)
 			out_path = os.path.join(args.out_path, file_name)
 			ap.save_wav(wav, out_path)
 			torch.save(mel.T, out_path[:-4] + '_mel.pt')
+			sentence_num += 1
 	print(" > Saving output to {}".format(out_path))
