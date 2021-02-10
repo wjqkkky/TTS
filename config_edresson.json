@@ -5,7 +5,7 @@
 //"restore_path":"../../datasets/training/checkpoints/vctk-jia-2018-per-sample-May-27-2020_04+30PM-788bb40/best_model.pth.tar",
 {
     "model": "Tacotron2",          // one of the model in models/
-    "run_name": "4th-haitian-eng",
+    "run_name": "5th-private-rhythm",
     "run_description": "tacotron2 multi speaker with CorentinJ speaker Encoder,  DDC and  GST with speaker_embedding",
 
     // AUDIO PARAMETERS
@@ -155,7 +155,7 @@
             {
                 "name": "private_data",
                 "path": "/data2/wangjiaqi/datasets/autohome",
-                "meta_file_train": "label_all.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
