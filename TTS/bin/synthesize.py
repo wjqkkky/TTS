@@ -7,15 +7,17 @@ import json
 import os
 import string
 import time
-import torch
+
 import numpy as np
+import torch
+import torchaudio
 
 from TTS.tts.utils.generic_utils import setup_model
 from TTS.tts.utils.synthesis import synthesis
 from TTS.tts.utils.text.symbols import make_symbols, _phonemes, _symbols
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
-from TTS.vocoder.utils.generic_utils import setup_generator
+from wavegrad.inference import load_model, predict
 
 
 def tts(model, vocoder_model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid, speaker_embedding=None,
@@ -152,17 +154,24 @@ if __name__ == "__main__":
 	print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
 
 	# load vocoder model
+	# if args.vocoder_path != "":
+	# 	VC = load_config(args.vocoder_config_path)
+	# 	vocoder_model = setup_generator(VC)
+	# 	vocoder_model.load_state_dict(torch.load(args.vocoder_path, map_location="cpu")["model"])
+	# 	vocoder_model.remove_weight_norm()
+	# 	if args.use_cuda:
+	# 		vocoder_model.cuda()
+	# 	vocoder_model.eval()
+	# else:
+	# 	vocoder_model = None
+	# 	VC = None
 	if args.vocoder_path != "":
-		VC = load_config(args.vocoder_config_path)
-		vocoder_model = setup_generator(VC)
-		vocoder_model.load_state_dict(torch.load(args.vocoder_path, map_location="cpu")["model"])
-		vocoder_model.remove_weight_norm()
-		if args.use_cuda:
-			vocoder_model.cuda()
-		vocoder_model.eval()
-	else:
-		vocoder_model = None
-		VC = None
+		print("Start loading wavegrad ...")
+		start_time = time.time()
+		params = {}
+		wg_model = load_model(model_dir=args.model_dir, params=params)
+		time_consuming = time.time() - start_time
+		print(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
 
 	# synthesize voice
 	use_griffin_lim = args.vocoder_path == ""
@@ -200,7 +209,7 @@ if __name__ == "__main__":
 				break
 			text = text.strip()
 			start_time = time.time()
-			print("Start synthesizing sentence: [{}]".format(text))
+			print("Start synthesizing mel, sentence: [{}]".format(text))
 			wav, mel = tts(model, vocoder_model, text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid,
 			               speaker_embedding=speaker_embedding, gst_style=gst_style)
 
@@ -209,10 +218,16 @@ if __name__ == "__main__":
 			# save the results
 			file_name = text.replace(" ", "_")
 			file_name = file_name.translate(
-				str.maketrans('', '', string.punctuation.replace('_', ''))) + '.wav'
+				str.maketrans('', '', string.punctuation.replace('_', ''))) + '_gl.wav'
 			file_name = "{}_{}".format(sentence_num, file_name)
 			out_path = os.path.join(args.out_path, file_name)
 			ap.save_wav(wav, out_path)
 			torch.save(mel.T, out_path[:-4] + '_mel.pt')
+			# wavegrad inference
+			print(" > Start inferencing wav, sentence {} . ".format(file_name))
+			audio, sr = predict(mel.T, model)
+			torchaudio.save(out_path.replace("gl.wav", "wg.wav"), audio.cpu(), sample_rate=sr)
+			time_consuming = time.time() - start_time
+			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
 			sentence_num += 1
 	print(" > Saving output to {}".format(out_path))
