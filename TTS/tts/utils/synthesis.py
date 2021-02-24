@@ -246,7 +246,7 @@ def synthesis(model,
     # convert outputs to numpy
     # plot results
     wav = None
-    if use_griffin_lim:
+    if not use_griffin_lim:
         wav = inv_spectrogram(postnet_output, ap, CONFIG)
         # trim silence
         if do_trim_silence:

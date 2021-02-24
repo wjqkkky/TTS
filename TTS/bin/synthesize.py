@@ -20,7 +20,7 @@ from TTS.utils.io import load_config
 from wavegrad_vocoder.inference import load_model, predict
 
 
-def tts(model, vocoder_model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid, speaker_embedding=None,
+def tts(model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid, speaker_embedding=None,
         gst_style=None):
 	t_1 = time.time()
 	waveform, _, _, mel_postnet_spec, _, _ = synthesis(model, text, CONFIG, use_cuda, ap, speaker_fileid, gst_style,
@@ -28,8 +28,8 @@ def tts(model, vocoder_model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid
 	                                                   speaker_embedding=speaker_embedding)
 	if CONFIG.model == "Tacotron" and not use_gl:
 		mel_postnet_spec = ap.out_linear_to_mel(mel_postnet_spec.T).T
-	if not use_gl:
-		waveform = vocoder_model.inference(torch.FloatTensor(mel_postnet_spec.T).unsqueeze(0))
+	# if not use_gl:
+	# 	waveform = vocoder_model.inference(torch.FloatTensor(mel_postnet_spec.T).unsqueeze(0))
 	if use_cuda and not use_gl:
 		waveform = waveform.cpu()
 	if not use_gl:
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 		print("Start loading wavegrad ...")
 		start_time = time.time()
 		params = {}
-		wg_model = load_model(model_dir=args.model_dir, params=params)
+		wg_model = load_model(model_dir=args.vocoder_path, params=params)
 		time_consuming = time.time() - start_time
 		print(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
 
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 			text = text.strip()
 			start_time = time.time()
 			print("Start synthesizing mel, sentence: [{}]".format(text))
-			wav, mel = tts(model, vocoder_model, text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid,
+			wav, mel = tts(model, text, C, args.use_cuda, ap, use_griffin_lim, args.speaker_fileid,
 			               speaker_embedding=speaker_embedding, gst_style=gst_style)
 
 			time_consuming = time.time() - start_time
