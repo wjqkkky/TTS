@@ -21,7 +21,7 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from wavegrad.model import WaveGrad
+from wavegrad_vocoder.model import WaveGrad
 
 def set_init_dict(model_dict, checkpoint_state):
     # Partial initialization: if there is a mismatch with new and old layer, it is skipped.

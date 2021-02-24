@@ -17,7 +17,7 @@ from TTS.tts.utils.synthesis import synthesis
 from TTS.tts.utils.text.symbols import make_symbols, _phonemes, _symbols
 from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
-from wavegrad.inference import load_model, predict
+from wavegrad_vocoder.inference import load_model, predict
 
 
 def tts(model, vocoder_model, text, CONFIG, use_cuda, ap, use_gl, speaker_fileid, speaker_embedding=None,

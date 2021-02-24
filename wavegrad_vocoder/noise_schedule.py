@@ -24,8 +24,8 @@ from glob import glob
 from itertools import product as cartesian_product
 from tqdm import tqdm
 
-from wavegrad.params import params
-from wavegrad.inference import predict
+from wavegrad_vocoder.params import params
+from wavegrad_vocoder.inference import predict
 
 
 def _round_up(x, multiple):

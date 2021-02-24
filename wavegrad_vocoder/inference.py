@@ -21,8 +21,8 @@ import torchaudio
 
 from argparse import ArgumentParser
 
-from wavegrad.params import AttrDict, params as base_params
-from wavegrad.model import WaveGrad
+from wavegrad_vocoder.params import AttrDict, params as base_params
+from wavegrad_vocoder.model import WaveGrad
 
 models = {}
 
