@@ -174,7 +174,8 @@ if __name__ == "__main__":
 		print(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
 
 	# synthesize voice
-	use_griffin_lim = args.vocoder_path == ""
+	# use_griffin_lim = args.vocoder_path == ""
+	use_griffin_lim = True
 	# print(" > Text: {}".format(args.text))
 
 	if not C.use_external_speaker_embedding_file:
