@@ -226,7 +226,7 @@ if __name__ == "__main__":
 			torch.save(mel.T, out_path[:-4] + '_mel.pt')
 			# wavegrad inference
 			print(" > Start inferencing audio, sentence {} . ".format(file_name))
-			audio, sr = predict(mel.T, wg_model)
+			audio, sr = predict(torch.tensor(mel.T), wg_model)
 			torchaudio.save(out_path.replace("gl.wav", "wg.wav"), audio.cpu(), sample_rate=sr)
 			time_consuming = time.time() - start_time
 			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
