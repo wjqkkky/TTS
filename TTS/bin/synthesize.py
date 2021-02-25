@@ -230,7 +230,7 @@ if __name__ == "__main__":
 			torchaudio.save(out_path.replace("gl.wav", "wg.wav"), audio.cpu(), sample_rate=sr)
 			time_consuming = time.time() - start_time
 			print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
-			rtf = time_consuming / (len(audio.cpu().numpy()) / ap.sample_rate)
+			rtf = time_consuming / (len(audio.cpu().numpy().squeeze()) / ap.sample_rate)
 			print(" > Real-time factor: {}".format(rtf))
 			sentence_num += 1
 	print(" > Saving output to {}".format(out_path))
