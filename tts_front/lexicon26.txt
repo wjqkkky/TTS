@@ -1,0 +1,26 @@
+A	EY1	ei4
+B	B IY1	b i4
+C	S IY1	s y i4
+D	D IY1	d i4
+E	IY1	y i4
+F	EH1 F	ai4 f u5
+G	JH IY1	zh y i4
+H	EY1 CH	ei4 ch i5
+I	AY1	ai4
+J	JH EY1	zh ei4
+K	K EY1	k ei4
+L	EH1 L	ai4 ou5
+M	EH1 M	ai4 m u5
+N	EH1 N	en4
+O	OW1	o4
+P	P IY1	p i4
+Q	K Y UW1	k iu4
+R	AA1 R	a4
+S	EH1 S	ai4 s i5
+T	T IY1	t i4
+U	Y UW1	iu4
+V	V IY1	w y i4
+W	D AH1 B AH0 L Y UW0	d a1 b u5 y ou5
+X	EH1 K S	ai4 k e5 s i5
+Y	W AY1	w ai4
+Z	Z IY1	z y i4

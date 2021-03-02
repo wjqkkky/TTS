@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import re
+import traceback
 import uuid
 import numpy as np
 import tornado.web
@@ -19,7 +20,9 @@ from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
 
 from hparams import hparams
-from tacotron.synthesizer import Synthesizer
+
+from TTS.server.live_synthesizer import Synthesizer
+from tts_front.ChineseRhythmPredictor.models.bilstm_cbow_pred_jiang_test_haitian import BiLSTM
 from tts_front.tts_main import main
 
 html_body = '''<html><title>TTS Demo</title><meta charset='utf-8'>
@@ -86,6 +89,7 @@ fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
 logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 tornado.log.enable_pretty_logging(use_options)
+speakers_dic = {1: "haitian031", 2: "niuman", 3: "m2voc_S1female"}
 
 
 class MainHandler(tornado.web.RequestHandler, object):
@@ -113,6 +117,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 	@gen.coroutine
 	def post(self):
 		res = {}
+		speaker = ""
 		try:
 			body_json = tornado.escape.json_decode(self.request.body)
 			text = body_json["text"]
@@ -122,6 +127,16 @@ class SynHandler(tornado.web.RequestHandler, object):
 				assert mode in [0, 1]
 			else:
 				mode = 0
+			voice = self.get_argument("voice", None, True)
+			if voice:
+				voice = int(voice)
+				if voice not in speakers_dic.keys():
+					res["returnCode"] = 103
+					res["message"] = "Voice ID Error"
+					self.finish(tornado.escape.json_encode(res))
+			else:
+				voice = 0
+			speaker = speakers_dic[voice]
 		except Exception as e:
 			self.set_header("Content-Type", "text/json;charset=UTF-8")
 			logger.exception(e)
@@ -130,10 +145,10 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.finish(tornado.escape.json_encode(res))
 			return
 		try:
-			pcms = yield self.syn(text, mode)
+			pcms = yield self.syn(text, mode, speaker)
 			logger.info("Receiving post request - [%s]", text)
 			wav = io.BytesIO()
-			wavfile.write(wav, hparams.sample_rate, pcms.astype(np.int16))
+			wavfile.write(wav, 22050, pcms.astype(np.int16))
 			self.set_header("Content-Type", "audio/wav")
 			self.finish(wav.getvalue())
 		except Exception as e:
@@ -144,11 +159,12 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.finish(tornado.escape.json_encode(res))
 
 	@run_on_executor
-	def syn(self, text, mode=0):
+	def syn(self, text, mode=0, speaker="haitian031"):
 		"""
 		inference audio
 		:param text:
 		:param mode: 0，正常模式，文本会过前端转成音素；1，测试模式，不过前端
+		:param speaker 说话人
 		:return:
 		"""
 		pcms = np.array([])
@@ -158,24 +174,23 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
-						period * 1000)
+			            period * 1000)
 			sentence_num = len(ch_rhy_list)
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
 				cur_phones = phone_list[i]
-				name = str(uuid.uuid4())
-				logger.info("Inference sentence: [%s], phones: [%s], uid: [%s]", cur_sentence, cur_phones, name)
+				logger.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
 				start_time = datetime.datetime.now()
-				res = synth.live_synthesize(cur_phones, name)
+				res = synth.synthesize(cur_phones, speaker)
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
-				logger.info("%s - Sentence total time consuming - [%sms]", name, period * 1000)
+				logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcm_arr = np.frombuffer(res, dtype=np.int16)[5000:-4000]
 				pcms = np.append(pcms, pcm_arr)
 		elif mode == 1:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
-			res = synth.live_synthesize(text, name)
+			res = synth.synthesize(text, speaker)
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
@@ -193,28 +208,40 @@ def split_text(text):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--checkpoint', default='model/tacotron_model.ckpt-175000',
-						help='Path to model checkpoint')
-	parser.add_argument('--hparams', default='',
-						help='Hyperparameter overrides as a comma-separated list of name=value pairs')
-	parser.add_argument('--port', default=12807, help='Port of Http service')
+	parser.add_argument('--taco_model', default='model/tacotron_model.ckpt-175000', help='Path to taco checkpoint')
+	parser.add_argument('--wavegrad_model', default='model/tacotron_model.ckpt-175000',
+	                    help='Path to wavegrad checkpoint')
+	parser.add_argument('--ebd_file', default='model/tacotron_model.ckpt-175000',
+	                    help='Path to speaker embedding file')
+	parser.add_argument('--config', default='config_edresson.json',
+	                    help='Path to speaker embedding file')
+	parser.add_argument('--port', default=16006, help='Port of Http service')
 	parser.add_argument('--host', default="0.0.0.0", help='Host of Http service')
-	parser.add_argument('--name', help='Name of logging directory if the two models were trained together.')
 	parser.add_argument('--fraction', default=0.3, help='Usage rate of per GPU.')
+	parser.add_argument('--frontend_mode', default=3, help='Usage rate of per GPU.')
 	args = parser.parse_args()
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 	# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
-	checkpoint = os.path.join(args.checkpoint)
+	taco_model_path = os.path.join(args.taco_model)
+	wavegrad_model_path = os.path.join(args.wavegrad_model)
+	ebd_file_path = os.path.join(args.ebd_file)
+	config_path = os.path.join(args.config_path)
+	key_model = int(args.frontend_mode)
+	if key_model == 1:
+		model = 'end'
+	elif key_model == 2:
+		model = 'None'
+	else:
+		model = BiLSTM()
+		model.load_model()
 
 	try:
-		checkpoint_path = checkpoint
-		logger.info('loaded model at {}'.format(checkpoint_path))
 		modified_hp = hparams.parse(args.hparams)
 		gpu_memory_fraction = float(args.fraction)
 		synth = Synthesizer()
-		synth.load(checkpoint_path=checkpoint_path, hparams=modified_hp, gpu_memory_fraction=gpu_memory_fraction)
+		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path)
 	except:
-		raise RuntimeError('Failed to load checkpoint at {}'.format(checkpoint))
+		traceback.print_exc()
 	logger.info("TTS service started...")
 	application = tornado.web.Application([
 		(r"/qicheren", MainHandler),
