@@ -19,8 +19,6 @@ from tornado import gen
 from tornado.concurrent import run_on_executor
 from concurrent.futures import ThreadPoolExecutor
 
-from hparams import hparams
-
 from TTS.server.live_synthesizer import Synthesizer
 from tts_front.ChineseRhythmPredictor.models.bilstm_cbow_pred_jiang_test_haitian import BiLSTM
 from tts_front.tts_main import main
@@ -225,7 +223,7 @@ if __name__ == "__main__":
 	taco_model_path = os.path.join(args.taco_model)
 	wavegrad_model_path = os.path.join(args.wavegrad_model)
 	ebd_file_path = os.path.join(args.ebd_file)
-	config_path = os.path.join(args.config_path)
+	config_path = os.path.join(args.config)
 	key_model = int(args.frontend_mode)
 	if key_model == 1:
 		model = 'end'
@@ -236,7 +234,6 @@ if __name__ == "__main__":
 		model.load_model()
 
 	try:
-		modified_hp = hparams.parse(args.hparams)
 		gpu_memory_fraction = float(args.fraction)
 		synth = Synthesizer()
 		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path)
