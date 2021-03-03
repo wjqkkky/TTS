@@ -116,11 +116,11 @@ class SynHandler(tornado.web.RequestHandler, object):
 			else:
 				voice = 1
 			speaker = speakers_dic[voice]
-			pcms = yield self.syn(orig_text, mode, speaker)
-			wav = io.BytesIO()
-			wavfile.write(wav, 22050, pcms.astype(np.int16))
+			wavs = yield self.syn(orig_text, mode, speaker)
+			# wav = io.BytesIO()
+			# wavfile.write(wav, 22050, pcms)
 			self.set_header("Content-Type", "audio/wav")
-			self.write(wav.getvalue())
+			self.write(wavs.getvalue())
 		except Exception as e:
 			logger.exception(e)
 
@@ -158,7 +158,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			pcms = yield self.syn(text, mode, speaker)
 			logger.info("Receiving post request - [%s]", text)
 			wav = io.BytesIO()
-			wavfile.write(wav, 22050, pcms.astype(np.int16))
+			wavfile.write(wav, 22050, pcms)
 			self.set_header("Content-Type", "audio/wav")
 			self.finish(wav.getvalue())
 		except Exception as e:
@@ -177,7 +177,8 @@ class SynHandler(tornado.web.RequestHandler, object):
 		:param speaker 说话人
 		:return:
 		"""
-		pcms = np.array([])
+		wavs= io.BytesIO()
+		# pcms = np.array([])
 		if mode == 0:
 			start_time = datetime.datetime.now()
 			ch_rhy_list, phone_list = split_text(text.strip())
@@ -195,7 +196,8 @@ class SynHandler(tornado.web.RequestHandler, object):
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
-				pcms = np.append(pcms, res)
+				wavs.write(res)
+				# pcms = np.append(pcms, res)
 		elif mode == 1:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
@@ -203,12 +205,12 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
-			pcm_arr = np.frombuffer(res, dtype=np.float32)
-			pcms = np.append(pcms, pcm_arr)
+			# pcms = np.append(pcms, res)
+			wavs.write(res)
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
-		return pcms
-
+		# return pcms
+		return wavs
 
 def split_text(text):
 	ch_rhy_list, phone_list = main(text, "end")
