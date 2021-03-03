@@ -116,11 +116,12 @@ class SynHandler(tornado.web.RequestHandler, object):
 			else:
 				voice = 1
 			speaker = speakers_dic[voice]
-			wavs = yield self.syn(orig_text, mode, speaker)
-			# wav = io.BytesIO()
-			# wavfile.write(wav, 22050, pcms)
+			pcm_arr = yield self.syn(orig_text, mode, speaker)
+			out = io.BytesIO()
+			wav_norm = pcm_arr * (32767 / max(0.01, np.max(np.abs(pcm_arr))))
+			wavfile.write(out, 22050, wav_norm.astype(np.int16))
 			self.set_header("Content-Type", "audio/wav")
-			self.write(wavs.getvalue())
+			self.write(out.getvalue())
 		except Exception as e:
 			logger.exception(e)
 
@@ -177,8 +178,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 		:param speaker 说话人
 		:return:
 		"""
-		wavs= io.BytesIO()
-		# pcms = np.array([])
+		pcms = np.array([])
 		if mode == 0:
 			start_time = datetime.datetime.now()
 			ch_rhy_list, phone_list = split_text(text.strip())
@@ -196,8 +196,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
-				wavs.write(res)
-				# pcms = np.append(pcms, res)
+				pcms = np.append(pcms, res)
 		elif mode == 1:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
@@ -205,12 +204,11 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
-			# pcms = np.append(pcms, res)
-			wavs.write(res)
+			pcms = np.append(pcms, res)
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
-		# return pcms
-		return wavs
+		return pcms
+
 
 def split_text(text):
 	ch_rhy_list, phone_list = main(text, "end")
