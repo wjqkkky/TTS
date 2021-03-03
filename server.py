@@ -195,7 +195,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
-				pcm_arr = np.frombuffer(res, dtype=np.int16)[5000:-4000]
+				pcm_arr = np.frombuffer(res, dtype=np.float32)[5000:-4000]
 				pcms = np.append(pcms, pcm_arr)
 		elif mode == 1:
 			name = str(uuid.uuid4())
@@ -204,7 +204,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
-			pcm_arr = np.frombuffer(res, dtype=np.int16)[5000:-4000]
+			pcm_arr = np.frombuffer(res, dtype=np.float32)[5000:-4000]
 			pcms = np.append(pcms, pcm_arr)
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
