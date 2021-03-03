@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class Synthesizer:
-	def __int__(self):
+	def __init__(self):
 		self.speaker_embedding_dict = {}
 		self.speaker_names = set()
 		self.speaker_embedding_dim = 0
