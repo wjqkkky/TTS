@@ -195,8 +195,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
-				pcm_arr = np.frombuffer(res, dtype=np.float32)
-				pcms = np.append(pcms, pcm_arr)
+				pcms = np.append(pcms, res)
 		elif mode == 1:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
@@ -231,7 +230,7 @@ if __name__ == "__main__":
 	parser.add_argument('--frontend_mode', default=3, help='Usage rate of per GPU.')
 	args = parser.parse_args()
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-	# os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+	os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 	taco_model_path = os.path.join(args.taco_model)
 	wavegrad_model_path = os.path.join(args.wavegrad_model)
 	ebd_file_path = os.path.join(args.ebd_file)

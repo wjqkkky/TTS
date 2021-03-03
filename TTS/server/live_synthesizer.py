@@ -93,5 +93,4 @@ class Synthesizer:
 		audio = audio.cpu().numpy().squeeze()
 		rtf = (t_3 - t_1) / (len(audio) / self.ap.sample_rate)
 		logger.info(" > Real-time factor: {}".format(rtf))
-		print(audio.dtype)
 		return audio
