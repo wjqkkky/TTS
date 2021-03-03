@@ -60,7 +60,7 @@ q('#button').addEventListener('click', function(e) {
   return false
 })
 function synthesize(text) {
-  fetch('/synthesize?text=' + encodeURIComponent(text), {cache: 'no-cache'})
+  fetch('/qicheren/synthesize?text=' + encodeURIComponent(text), {cache: 'no-cache'})
 	.then(function(res) {
 	  if (!res.ok) throw Error(res.statusText)
 	  return res.blob()
@@ -114,7 +114,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			if voice:
 				voice = int(voice)
 			else:
-				voice = 0
+				voice = 1
 			speaker = speakers_dic[voice]
 			pcms = yield self.syn(orig_text, mode, speaker)
 			wav = io.BytesIO()
@@ -145,7 +145,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 					res["message"] = "Voice ID Error"
 					self.finish(tornado.escape.json_encode(res))
 			else:
-				voice = 0
+				voice = 1
 			speaker = speakers_dic[voice]
 		except Exception as e:
 			self.set_header("Content-Type", "text/json;charset=UTF-8")
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 	logger.info("TTS service started...")
 	application = tornado.web.Application([
 		(r"/", MainHandler),
-		(r"/synthesize", SynHandler),
+		(r"//synthesize", SynHandler),
 	])
 	application.listen(int(args.port), xheaders=True)
 	tornado.ioloop.IOLoop.instance().start()
