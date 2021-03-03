@@ -89,6 +89,7 @@ class Synthesizer:
 		audio, sr = predict(torch.tensor(mel_postnet_spec.T), self.wg_model)
 		t_3 = time.time()
 		logger.info(" > Wavegrad complete, time consuming {}s".format(round(t_3 - t_2, 2)))
+		torchaudio.save("1.wav", audio.cpu(), sample_rate=sr)
 		audio = audio.cpu().numpy().squeeze()
 		rtf = (t_3 - t_1) / (len(audio) / self.ap.sample_rate)
 		logger.info(" > Real-time factor: {}".format(rtf))
