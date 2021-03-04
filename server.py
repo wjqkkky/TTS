@@ -9,6 +9,7 @@ import re
 import traceback
 import uuid
 import numpy as np
+import torch
 import tornado.web
 import tornado.ioloop
 import tornado.escape
@@ -117,11 +118,9 @@ class SynHandler(tornado.web.RequestHandler, object):
 				voice = 1
 			speaker = speakers_dic[voice]
 			pcm_arr = yield self.syn(orig_text, mode, speaker)
-			out = io.BytesIO()
-			wav_norm = pcm_arr * (32767 / max(0.01, np.max(np.abs(pcm_arr))))
-			wavfile.write(out, 22050, wav_norm.astype(np.int16))
+			audio_stream = norm(pcm_arr)
 			self.set_header("Content-Type", "audio/wav")
-			self.write(out.getvalue())
+			self.write(audio_stream.getvalue())
 		except Exception as e:
 			logger.exception(e)
 
@@ -132,6 +131,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 		try:
 			body_json = tornado.escape.json_decode(self.request.body)
 			text = body_json["text"]
+			logger.info("Receiving post request - [%s]", text)
 			mode = self.get_argument("mode", None, True)
 			if mode:
 				mode = int(mode)
@@ -156,12 +156,10 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.finish(tornado.escape.json_encode(res))
 			return
 		try:
-			pcms = yield self.syn(text, mode, speaker)
-			logger.info("Receiving post request - [%s]", text)
-			wav = io.BytesIO()
-			wavfile.write(wav, 22050, pcms)
+			pcm_arr = yield self.syn(text, mode, speaker)
+			audio_stream = norm(pcm_arr)
 			self.set_header("Content-Type", "audio/wav")
-			self.finish(wav.getvalue())
+			self.finish(audio_stream.getvalue())
 		except Exception as e:
 			self.set_header("Content-Type", "text/json;charset=UTF-8")
 			logger.exception(e)
@@ -196,7 +194,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
-				pcms = np.append(pcms, res)
+				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		elif mode == 1:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
@@ -204,7 +202,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
-			pcms = np.append(pcms, res)
+			pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
 		return pcms
@@ -213,6 +211,13 @@ class SynHandler(tornado.web.RequestHandler, object):
 def split_text(text):
 	ch_rhy_list, phone_list = main(text, "end")
 	return ch_rhy_list, phone_list
+
+
+def norm(pcm_arr):
+	audio_stream = io.BytesIO()
+	wav_norm = pcm_arr * (32767 / max(0.01, np.max(np.abs(pcm_arr))))
+	wavfile.write(audio_stream, 22050, wav_norm.astype(np.int16))
+	return audio_stream
 
 
 if __name__ == "__main__":
@@ -235,6 +240,9 @@ if __name__ == "__main__":
 	wavegrad_model_path = os.path.join(args.wavegrad_model)
 	ebd_file_path = os.path.join(args.ebd_file)
 	config_path = os.path.join(args.config)
+	noise_schedule = None
+	if args.noise_schedule:
+		noise_schedule = torch.from_numpy(np.load(args.noise_schedule))
 	key_model = int(args.frontend_mode)
 	if key_model == 1:
 		model = 'end'
@@ -247,7 +255,7 @@ if __name__ == "__main__":
 	try:
 		gpu_memory_fraction = float(args.fraction)
 		synth = Synthesizer()
-		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path)
+		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path, noise_schedule)
 	except:
 		traceback.print_exc()
 	logger.info("TTS service started...")

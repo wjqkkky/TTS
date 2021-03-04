@@ -32,7 +32,7 @@ class Synthesizer:
 		self.ap = None
 		self.C = None
 
-	def load(self, taco_checkpoint, wg_checkpoint, ebd_file_path, config_path):
+	def load(self, taco_checkpoint, wg_checkpoint, ebd_file_path, config_path, noise_schedule):
 		# load the config
 		self.C = load_config(config_path)
 		self.C.forward_attn_mask = True
@@ -76,6 +76,8 @@ class Synthesizer:
 		logger.info(" > Start loading wavegrad ...")
 		start_time = time.time()
 		params = {}
+		if noise_schedule:
+			params['noise_schedule'] = noise_schedule
 		self.wg_model = load_model(model_dir=wg_checkpoint, params=params)
 		time_consuming = time.time() - start_time
 		logger.info(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
