@@ -229,6 +229,7 @@ if __name__ == "__main__":
 	                    help='Path to speaker embedding file')
 	parser.add_argument('--config', default='config_edresson.json',
 	                    help='Path to speaker embedding file')
+	parser.add_argument('--noise_schedule', default="", help='Noise_schedule npy filepath')
 	parser.add_argument('--port', default=16006, help='Port of Http service')
 	parser.add_argument('--host', default="0.0.0.0", help='Host of Http service')
 	parser.add_argument('--fraction', default=0.3, help='Usage rate of per GPU.')
