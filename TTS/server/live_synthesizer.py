@@ -76,7 +76,7 @@ class Synthesizer:
 		logger.info(" > Start loading wavegrad ...")
 		start_time = time.time()
 		params = {}
-		if noise_schedule:
+		if noise_schedule is not None:
 			params['noise_schedule'] = noise_schedule
 		self.wg_model = load_model(model_dir=wg_checkpoint, params=params)
 		time_consuming = time.time() - start_time
