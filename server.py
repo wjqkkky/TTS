@@ -61,7 +61,7 @@ q('#button').addEventListener('click', function(e) {
   return false
 })
 function synthesize(text) {
-  fetch('/qicheren/synthesize?text=' + encodeURIComponent(text), {cache: 'no-cache'})
+  fetch('/synthesize?text=' + encodeURIComponent(text) + '&voice=' + getQueryVariable("voice") , {cache: 'no-cache'})
 	.then(function(res) {
 	  if (!res.ok) throw Error(res.statusText)
 	  return res.blob()
@@ -74,6 +74,16 @@ function synthesize(text) {
 	  q('#message').textContent = 'ERROR! '
 	  q('#button').disabled = false
 	})
+}
+function getQueryVariable(variable)
+{
+       var query = window.location.search.substring(1);
+       var vars = query.split("&");
+       for (var i=0;i<vars.length;i++) {
+               var pair = vars[i].split("=");
+               if(pair[0] == variable){return pair[1];}
+       }
+       return(1);
 }
 </script></body></html>
 '''
