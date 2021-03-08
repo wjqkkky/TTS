@@ -21,7 +21,7 @@ def split_text(text):
     #，|：|。|；|？|！|——
     text = text.replace('，',',').replace('？','?').replace('！','!').replace('；',';')
     # pattern_str = "，|。|；|,|？|！|——|\n|-"
-    pattern_str = ",|。|;|\?|!|——|\n|-"
+    pattern_str = ",|。|;|\?|!|——|\n"
     match = re.search(r"\W", text)
     if not match:
         return [text]
@@ -141,7 +141,7 @@ def ending_add_rhy(chinese:str):
     return chinese
 def is_continuous_sign(string):
     """
-    检查整个字符串是否包含中文
+    检查整个字符串是否包含中文,字母
     :param string: 需要检查的字符串
     :return: bool
     """
@@ -178,7 +178,8 @@ def rm_continuous_sign(chinese):
         else:
             chinese = chinese + ','+chinese_
         split_chinese_list.append(chinese_+',')
-    split_chinese_list[-1]=split_chinese_list[-1][:-1]+'。'
+    if len(split_chinese_list)>1:
+        split_chinese_list[-1]=split_chinese_list[-1][:-1]+'。'
     return chinese,split_chinese_list
 def merge_rh(chinese,min_rhy_len=4):
     '''
@@ -198,8 +199,12 @@ def merge_rh(chinese,min_rhy_len=4):
                         new[-1] = new[-1] + chinese_split[i]
                         flag = 0
                     else:
-                        new.append(chinese_split[i])
-                        flag = 1
+                        if len(new[-1])< min_rhy_len:
+                            new[-1] = new[-1] + chinese_split[i]
+                            flag = 0
+                        else:####
+                            new.append(chinese_split[i])
+                            flag = 1
                 else:
                     new[-1] = new[-1] + chinese_split[i]
                     flag = 0
@@ -210,7 +215,10 @@ def merge_rh(chinese,min_rhy_len=4):
                 new[-1] = new[-1] + chinese_split[i]
                 flag = 0
             else:
-                new.append(chinese_split[i])
+                if len(new[-1]) < min_rhy_len:
+                    new[-1] = new[-1] + chinese_split[i]
+                else:  ####
+                    new.append(chinese_split[i])
     return '#1'.join(new) + '#'+end_chinese
 
 def long_sentence_add_rhy(chinese_rm_symbols_list,model,sentence_len=14):
@@ -245,8 +253,8 @@ def main(chinese:str,model,Long_sentence_add=True):
     chinese=regula_specail(chinese)
     ####多个连续空格保留一个，若最后一个为空格则去除
     chinese = ' '.join(chinese.split())
-    if len(chinese)==0:
-        return [','],[',']
+    if len(chinese)==0:#若输入的有效字符为空，则输出为空
+        return [''],['']
     # if chinese[-1] == ' ':
     #     chinese = chinese[:-1]
     ####将空格替换为*
@@ -258,7 +266,7 @@ def main(chinese:str,model,Long_sentence_add=True):
     for ch in chinese_list:
         star_time = time.time()
         chinese_nor = NSWNormalizer(ch).normalize()
-        chinese_nor = chinese_nor.replace(":", ',').replace('.','。')
+        chinese_nor = chinese_nor.replace(":", ',').replace('.','。').replace('-',',')
         end_nor_time = time.time()
         chinese_rm_symbols = rm.remove_symbols(chinese_nor)
         chinese_rm_symbols,chinese_rm_symbols_list = rm_continuous_sign(chinese_rm_symbols)#chinese_rm_symbols为str，chinese_rm_symbols_list为列表

@@ -89,6 +89,28 @@ def split_chinese_eng(string:str):
                 str_word=ph
     list_final.append(str_word)
     return list_final
+def firt_word_flag_after_a(i,list_final):
+    '''
+    检查a后第一个单词或者汉字，若为单词则为False按照AH0读，若为汉字或者字符则为True按照EA1读
+    :param i: a所在的索引
+    :param list_final: 中英文分割后的列表
+    :return:按照单词读为False，按照字母读为True
+    '''
+    zhmodel = re.compile(u'[\u4e00-\u9fa5]')
+    i = i + 1
+    while i < len(list_final):
+        if list_final[i].isupper() or list_final[i].islower():
+            if len(list_final[i])>1 and (d.check(list_final[i]) or d.check(list_final[i].title())):
+                return False
+            else:
+                return True
+        else:
+            match = zhmodel.search(list_final[i])
+            if match:
+                return True
+        i = i + 1
+    return True
+
 def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
     '''
     将单独的英文和中文转化为音素
@@ -96,13 +118,15 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
     :return:中英文分割后的列表转化为音素
     '''
     phone_final = []
+    zimu_read=['a','it','led','mm','id']
     ###中文转化为拼音，英文转化为音素
-    for word in list_final:
-
+    for i,word in enumerate(list_final):
         if word[0].islower() or word[0].isupper():
             # if word in words.words():
             flag_check = d.check(word) or d.check(word.title())  ###True为单词，False为字母
             # flag_check = False  #仅仅处理为字母，全部按照字母读
+            if (word.lower() in zimu_read)and firt_word_flag_after_a(i, list_final):
+                flag_check=False
             if flag_check:
                 # en_phone = g2p(word)
                 en_phone = pronouncing.phones_for_word(word)
@@ -123,6 +147,8 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
                 # if word in words.words():###判断是否为英文单词
                 flag_check = d.check(word)  ###True为单词，False为字母
                 # flag_check=False##全部按照字母读
+                if (word.lower() in zimu_read ) and firt_word_flag_after_a(i, list_final):
+                    flag_check = False
                 if flag_check:
                     # en_phone = g2p(word)
                     en_phone = pronouncing.phones_for_word(word)

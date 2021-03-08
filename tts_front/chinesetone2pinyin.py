@@ -8,7 +8,8 @@
 # notes: python 2.X WILL fail or produce misleading results
 
 import sys, os, argparse, codecs, string, re
-
+import time
+import datetime
 
 from tts_front.change_tone import chinese_bian_diao_pinyin
 
@@ -624,12 +625,41 @@ class date2chn:
     def date2chnTochntext(self):
         dateNum = self.date2chn.split(':')
         if len(dateNum) == 2:
-            return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分'
+            try:
+                time_num = time.strptime(self.date2chn,'%H:%M')
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分'
+            except:
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'，'
         if len(dateNum) == 3:
-            return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分' +Cardinal(cardinal=dateNum[2]).cardinal2chntext() +'秒'
+            try:
+                time_num = time.strptime(self.date2chn, '%H:%M:%S')
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() +\
+                       '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分' +\
+                       Cardinal(cardinal=dateNum[2]).cardinal2chntext() +'秒'
+            except:
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','\
+                       + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '，'+Cardinal(cardinal=dateNum[2]).cardinal2chntext() + ','
+
 # ================================================================================ #
 #                            NSW Normalizer
 # ================================================================================ #
+
+def is_date(matcher,split_key):
+    numbers = re.split(split_key, matcher)
+    if len(numbers)==3:
+        try:
+            date_ = datetime.datetime.strptime(matcher,'%Y'+split_key+'%m'+split_key+'%d').date()
+            return str(date_.year)+'年'+str(date_.month)+'月'+str(date_.day)+'日'
+        except:
+            return numbers[0]+','+numbers[1]+','+numbers[2]
+    else:
+        if split_key=='-' and len(numbers)==2:
+            return numbers[0]+'至'+numbers[1]
+        elif split_key=='/' and len(numbers)==2:
+            return matcher
+        else:
+            return ','.join(numbers)
+
 class NSWNormalizer:
     def __init__(self, raw_text):
         # raw_text_split = raw_text.split('|')
@@ -650,11 +680,24 @@ class NSWNormalizer:
 
     def normalize(self):
         text = self.raw_text
+        #是否按照日期读取2021/3/5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开，若为两位，则11/12保持不变
+        pattern = re.compile(r'(\d+/\d+(/\d+)?)')
+        matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
+        for matcher in matchers:
+            date_result = is_date(matcher[0], '/')
+            text = text.replace(matcher[0], date_result)
 
+        # 是否按照日期读取2021-3-5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开,若为两位，则改为11-12改为11至12
+        pattern = re.compile(r'(\d+-\d+(-\d+)?)')
+        matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
+        for matcher in matchers:
+            date_result = is_date(matcher[0], '-')
+            text = text.replace(matcher[0], date_result)
         # 规范化日期
         pattern = re.compile(r"\D+((([089]\d|(19|20)\d{2})年)?(\d{1,2}月(\d{1,2}[日号])?)?)")
         matchers = pattern.findall(text)
-
         if matchers:
             for matcher in matchers:
                 text = text.replace(matcher[0], Date(date=matcher[0]).date2chntext(), 1)
@@ -684,12 +727,7 @@ class NSWNormalizer:
         if matchers:
             for matcher in matchers:
                 text = text.replace(matcher[0], TelePhone(telephone=matcher[0]).telephone2chntext(fixed=True), 1)
-        # # 规范化比分
-        # pattern = re.compile(r'(\d+/\d+(/\d+)?)')
-        # matchers = pattern.findall(text)
-        # if matchers:
-        #     for matcher in matchers:
-        #         print(matchers)
+
         # 规范化分数
         pattern = re.compile(r"(\d+/\d+)")
         matchers = pattern.findall(text)
@@ -709,6 +747,7 @@ class NSWNormalizer:
         pattern = re.compile(r'(\d+:\d+(:\d+)?)')
         # pattern = re.compile(r"\D+(((\d+:)?(\d:(\d+)?)?)")
         matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
         if matchers:
             for matcher in matchers:
                 text =text.replace(matcher[0],date2chn(date2chn = matcher[0]).date2chnTochntext())
@@ -835,6 +874,6 @@ def chinese2pinyin(chinese_input):
     return chinese_normal,pinyin
 if __name__=='__main__':
     # test = '新车搭载代号LT2.33.44.23.2的6.2.四2LV8发动机'
-    test = '号为1234'
+    test = '12:12,24:35,12:12:14 雅阁的官方指导价为17.98-25.98万，而这款车车主实际的成交价基本都在17.38-25.08万左右。从外观尺寸上看，这款车的长宽高分别为4893/1862/1449，'
     chinese = NSWNormalizer(test).normalize()
     print(chinese)

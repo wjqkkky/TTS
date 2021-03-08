@@ -125,8 +125,8 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
     :param order_yi:一的次序
     :return:变调完的句子汉语拼音
     '''
-    number_list = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','月','日','流',',','。','，']
-    number_=['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','点','之','比','不']
+    number_list = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','月','日','流',',','。','，','不','至']
+    number_=['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','点','之','比','不','至']
     all_index_list_yi = find_index(text_chinese, '一')
     split_chinese_sentence_pinyin = chinese_sentence_pinyin.split()
     if len(word) > 1:
@@ -303,7 +303,7 @@ def chinese_bian_diao_pinyin(chinese: str,flag_san_san_key=False):
 
 if __name__ == '__main__':
     # chinese = '所以我只敢打你'
-    chinese = '一，是什么'
+    chinese = '一不做二不休'
     result = chinese_bian_diao_pinyin(chinese)
     # # result=rhotic_accent(result,chinese)
     print(result)
