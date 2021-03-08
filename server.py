@@ -61,7 +61,7 @@ q('#button').addEventListener('click', function(e) {
   return false
 })
 function synthesize(text) {
-  fetch('/qicheren/synthesize?text=' + encodeURIComponent(text) + '&voice=' + getQueryVariable("voice") , {cache: 'no-cache'})
+  fetch('/qicheren/synthesize?text=' + encodeURIComponent(text) + '&voice=' + getQueryVariable("voice") + '&mode=' + getQueryVariable("mode"), {cache: 'no-cache'})
 	.then(function(res) {
 	  if (!res.ok) throw Error(res.statusText)
 	  return res.blob()
