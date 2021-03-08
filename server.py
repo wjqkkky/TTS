@@ -118,9 +118,9 @@ class SynHandler(tornado.web.RequestHandler, object):
 			mode = self.get_argument("mode", None, True)
 			if mode:
 				mode = int(mode)
-				assert mode in [0, 1]
+				assert mode in [1, 2]
 			else:
-				mode = 0
+				mode = 1
 			voice = self.get_argument("voice", None, True)
 			if voice:
 				voice = int(voice)
@@ -145,9 +145,9 @@ class SynHandler(tornado.web.RequestHandler, object):
 			mode = self.get_argument("mode", None, True)
 			if mode:
 				mode = int(mode)
-				assert mode in [0, 1]
+				assert mode in [1, 2]
 			else:
-				mode = 0
+				mode = 1
 			voice = self.get_argument("voice", None, True)
 			if voice:
 				voice = int(voice)
@@ -182,12 +182,12 @@ class SynHandler(tornado.web.RequestHandler, object):
 		"""
 		inference audio
 		:param text:
-		:param mode: 0，正常模式，文本会过前端转成音素；1，测试模式，不过前端
+		:param mode: 1，正常模式，文本会过前端转成音素；2，测试模式，不过前端
 		:param speaker 说话人
 		:return:
 		"""
 		pcms = np.array([])
-		if mode == 0:
+		if mode == 1:
 			start_time = datetime.datetime.now()
 			ch_rhy_list, phone_list = split_text(text.strip())
 			end_time = datetime.datetime.now()
@@ -205,7 +205,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 				period = round((end_time - start_time).total_seconds(), 3)
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
-		elif mode == 1:
+		elif mode == 2:
 			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
 			res = synth.synthesize(text, speaker)
