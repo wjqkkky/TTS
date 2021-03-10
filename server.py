@@ -98,7 +98,7 @@ fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
 logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 tornado.log.enable_pretty_logging(use_options)
-speakers_dic = {1: "haitian031", 2: "niuman", 3: "m2voc_S1female"}
+speakers_dic = {1: "haitian031", 2: "m2voc_S1female", 3: "niuman"}
 
 
 class MainHandler(tornado.web.RequestHandler, object):
@@ -206,12 +206,11 @@ class SynHandler(tornado.web.RequestHandler, object):
 				logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		elif mode == 2:
-			name = str(uuid.uuid4())
 			start_time = datetime.datetime.now()
 			res = synth.synthesize(text, speaker)
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
-			logger.info("%s - sentence total time consuming - [%sms]", name, period * 1000)
+			logger.info("Sentence total time consuming - [%sms]", period * 1000)
 			pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
