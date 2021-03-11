@@ -198,19 +198,19 @@ class SynHandler(tornado.web.RequestHandler, object):
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
 				cur_phones = phone_list[i]
-				logger.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
+				# logger.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
 				start_time = datetime.datetime.now()
 				res = synth.synthesize(cur_phones, speaker)
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
-				logger.info("Sentence total time consuming - [%sms]", period * 1000)
+				# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		elif mode == 2:
 			start_time = datetime.datetime.now()
 			res = synth.synthesize(text, speaker)
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
-			logger.info("Sentence total time consuming - [%sms]", period * 1000)
+			# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 			pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
@@ -218,7 +218,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 
 
 def split_text(text):
-	ch_rhy_list, phone_list = main(text, "end")
+	ch_rhy_list, phone_list = main(text, model)
 	return ch_rhy_list, phone_list
 
 
@@ -253,6 +253,7 @@ if __name__ == "__main__":
 	noise_schedule = None
 	if args.noise_schedule:
 		noise_schedule = torch.from_numpy(np.load(args.noise_schedule))
+	model = 'end'
 	key_model = int(args.frontend_mode)
 	if key_model == 1:
 		model = 'end'
@@ -266,8 +267,8 @@ if __name__ == "__main__":
 		gpu_memory_fraction = float(args.fraction)
 		synth = Synthesizer()
 		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path, noise_schedule)
-	except:
-		traceback.print_exc()
+	except Exception as e:
+		logger.exception(e)
 	logger.info("TTS service started...")
 	application = tornado.web.Application([
 		(r"/", MainHandler),

@@ -17,9 +17,9 @@ from TTS.utils.audio import AudioProcessor
 from TTS.utils.io import load_config
 from wavegrad_vocoder.inference import load_model, predict
 
-fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
-logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
+# logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 
 
 class Synthesizer:
@@ -44,7 +44,8 @@ class Synthesizer:
 		if 'characters' in self.C.keys():
 			symbols, phonemes = make_symbols(**self.C.characters)
 		# load speakers
-		logger.info(" > Start loading speaker embedding ...")
+		# logger.info(" > Start loading speaker embedding ...")
+		print(" > Start loading speaker embedding ...")
 		start_time = time.time()
 		speaker_mapping = json.load(open(ebd_file_path, 'r'))
 		self.speaker_embedding_dim = len(speaker_mapping[list(speaker_mapping.keys())[0]]['embedding'])
@@ -61,8 +62,10 @@ class Synthesizer:
 			self.speaker_embedding_dict[speaker] = np.mean(np.array(self.speaker_embedding_dict[speaker]),
 			                                               axis=0).tolist()
 		time_consuming = time.time() - start_time
-		logger.info(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
-		logger.info(" > Start loading Taco2 ...")
+		# logger.info(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
+		# logger.info(" > Start loading Taco2 ...")
+		print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
+		print(" > Start loading Taco2 ...")
 		start_time = time.time()
 		num_chars = len(_phonemes) if self.C.use_phonemes else len(_symbols)
 		self.taco_model = setup_model(num_chars, num_speakers, self.C, self.speaker_embedding_dim)
@@ -72,15 +75,18 @@ class Synthesizer:
 		self.taco_model.cuda()
 		self.taco_model.decoder.set_r(cp['r'])
 		time_consuming = time.time() - start_time
-		logger.info(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
-		logger.info(" > Start loading wavegrad ...")
+		# logger.info(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
+		# logger.info(" > Start loading wavegrad ...")
+		print(" > Complete, time consuming {}s".format(round(time_consuming, 2)))
+		print(" > Start loading wavegrad ...")
 		start_time = time.time()
 		params = {}
 		if noise_schedule is not None:
 			params['noise_schedule'] = noise_schedule
 		self.wg_model = load_model(model_dir=wg_checkpoint, params=params)
 		time_consuming = time.time() - start_time
-		logger.info(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
+		# logger.info(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
+		print(" > Load wavegrad model, time consuming {}s".format(round(time_consuming, 2)))
 
 	def synthesize(self, text, speaker_name):
 		t_1 = time.time()
@@ -88,11 +94,11 @@ class Synthesizer:
 		                                            False, self.C.enable_eos_bos_chars, False, False,
 		                                            speaker_embedding=self.speaker_embedding_dict[speaker_name])
 		t_2 = time.time()
-		logger.info(" > Taco complete, time consuming {}s".format(round(t_2 - t_1, 2)))
+		# logger.info(" > Taco complete, time consuming {}s".format(round(t_2 - t_1, 2)))
 		audio, sr = predict(torch.tensor(mel_postnet_spec.T), self.wg_model)
 		t_3 = time.time()
-		logger.info(" > Wavegrad complete, time consuming {}s".format(round(t_3 - t_2, 2)))
+		# logger.info(" > Wavegrad complete, time consuming {}s".format(round(t_3 - t_2, 2)))
 		audio = audio.cpu().numpy().squeeze()
 		rtf = (t_3 - t_1) / (len(audio) / self.ap.sample_rate)
-		logger.info(" > Real-time factor: {}".format(rtf))
+		# logger.info(" > Real-time factor: {}".format(rtf))
 		return audio
