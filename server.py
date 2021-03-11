@@ -274,5 +274,9 @@ if __name__ == "__main__":
 		(r"/", MainHandler),
 		(r"//synthesize", SynHandler),
 	])
+	fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
+	logging.basicConfig(level=logging.INFO, handlers=[fh],
+	                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	logger = logging.getLogger(__name__)
 	application.listen(int(args.port), xheaders=True)
 	tornado.ioloop.IOLoop.instance().start()
