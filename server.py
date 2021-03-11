@@ -33,10 +33,10 @@ logger = logging.getLogger('tensorflow')
 logger.setLevel(logging.DEBUG)
 
 # create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 # create file handler which logs even debug messages
-fh = logging.FileHandler('log/tts.log')
+fh = logging.FileHandler(encoding='utf-8', mode='a', filename='log/tts.log')
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 logger.addHandler(fh)
@@ -231,7 +231,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
-			             period * 1000)
+			            period * 1000)
 			sentence_num = len(ch_rhy_list)
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
@@ -283,6 +283,7 @@ if __name__ == "__main__":
 	parser.add_argument('--fraction', default=0.3, help='Usage rate of per GPU.')
 	parser.add_argument('--frontend_mode', default=3, help='Usage rate of per GPU.')
 	logger.info("test...")
+	logger.info("王德发...")
 
 	args = parser.parse_args()
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
