@@ -1,63 +1,21 @@
-import logging
-
-import tornado.log
-import tornado.options
-
-#
-# use_options = tornado.options.options
-# #
-# use_options.log_to_stderr = True
-# use_options.log_rotate_mode = 'time'
-# use_options.log_file_prefix = './log/tts.log'
-# use_options.log_rotate_when = 'W0'
-# use_options.log_rotate_interval = 2
-#
-# logging.root.handlers = []
-# FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
-# logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
-# logger = logging.getLogger(__name__)
-#
-# tornado.log.enable_pretty_logging(use_options)
-# zhangqi
-# _format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-# filename = "log/tts.log"
-# fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
-# fh.setFormatter(_format)
-# sh = logging.StreamHandler()
-# sh.setFormatter(_format)
-# logging.getLogger().addHandler(fh)
-# logging.getLogger().addHandler(sh)
-
-# get TF logger
-logger = logging.getLogger('tensorflow')
-logger.setLevel(logging.DEBUG)
-
-# create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-# create file handler which logs even debug messages
-fh = logging.FileHandler(encoding='utf-8', mode='a', filename='log/tts.log')
-fh.setLevel(logging.DEBUG)
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-
 import argparse
 import datetime
 import io
+import logging
 import os
-from concurrent.futures import ThreadPoolExecutor
-
 import numpy as np
 import torch
 import tornado.escape
 import tornado.ioloop
 import tornado.log
+import tornado.log
+import tornado.options
 import tornado.options
 import tornado.web
 from scipy.io import wavfile
+from concurrent.futures import ThreadPoolExecutor
 from tornado import gen
 from tornado.concurrent import run_on_executor
-
 from TTS.server.live_synthesizer import Synthesizer
 from tts_front.ChineseRhythmPredictor.models.bilstm_cbow_pred_jiang_test_haitian import BiLSTM
 from tts_front.tts_main import main
@@ -125,17 +83,17 @@ function getQueryVariable(variable)
 }
 </script></body></html>
 '''
+# get TF logger
+logger = logging.getLogger('tensorflow')
+logger.setLevel(logging.DEBUG)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+# create file handler which logs even debug messages
+fh = logging.FileHandler(encoding='utf-8', mode='a', filename='log/tts.log')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
-# use_options = tornado.options.options
-# use_options.log_to_stderr = True
-# use_options.log_rotate_mode = str('time')
-# use_options.log_file_prefix = str('./log/tts_server.log')
-# use_options.log_rotate_when = str('W0')
-# use_options.log_rotate_interval = 2
-# fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
-# logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-# logger = logging.getLogger(__name__)
-# tornado.log.enable_pretty_logging(use_options)
 speakers_dic = {1: "haitian031", 2: "m2voc_S1female", 3: "niuman"}
 
 
@@ -146,7 +104,7 @@ class MainHandler(tornado.web.RequestHandler, object):
 
 
 class SynHandler(tornado.web.RequestHandler, object):
-	executor = ThreadPoolExecutor(15)
+	executor = ThreadPoolExecutor(10)
 
 	@gen.coroutine
 	def get(self):
@@ -216,7 +174,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.finish(tornado.escape.json_encode(res))
 
 	@run_on_executor
-	def syn(self, text, mode=0, speaker="haitian031"):
+	def syn(self, text, mode=1, speaker="haitian031"):
 		"""
 		inference audio
 		:param text:
@@ -233,23 +191,26 @@ class SynHandler(tornado.web.RequestHandler, object):
 			logger.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
 			            period * 1000)
 			sentence_num = len(ch_rhy_list)
+			start_time = datetime.datetime.now()
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
 				cur_phones = phone_list[i]
 				# logger.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
-				start_time = datetime.datetime.now()
+				# start_time = datetime.datetime.now()
 				res = synth.synthesize(cur_phones, speaker)
-				end_time = datetime.datetime.now()
+				# end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
 				# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
+			end_time = datetime.datetime.now()
+			logger.info("Complete, Time consuming: [%sms]", period * 1000)
 		elif mode == 2:
 			start_time = datetime.datetime.now()
 			res = synth.synthesize(text, speaker)
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
-			# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 			pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
+			logger.info("Complete, Time consuming: [%sms]", period * 1000)
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
 		return pcms
@@ -270,20 +231,19 @@ def norm(pcm_arr):
 if __name__ == "__main__":
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--taco_model', default='model/tacotron_model.ckpt-175000', help='Path to taco checkpoint')
-	parser.add_argument('--wavegrad_model', default='model/tacotron_model.ckpt-175000',
+	parser.add_argument('--taco_model', default='../model/checkpoint_70000.pth.tar', help='Path to taco checkpoint')
+	parser.add_argument('--wavegrad_model', default='../model/weights-788040.pt',
 	                    help='Path to wavegrad checkpoint')
-	parser.add_argument('--ebd_file', default='model/tacotron_model.ckpt-175000',
+	parser.add_argument('--ebd_file', default='../model/speakers_all.json',
 	                    help='Path to speaker embedding file')
 	parser.add_argument('--config', default='config_edresson.json',
 	                    help='Path to speaker embedding file')
-	parser.add_argument('--noise_schedule', default="", help='Noise_schedule npy filepath')
+	parser.add_argument('--noise_schedule', default="../model/mult_10_788040_noise_schedule.npy",
+	                    help='Noise_schedule npy filepath')
 	parser.add_argument('--port', default=16006, help='Port of Http service')
 	parser.add_argument('--host', default="0.0.0.0", help='Host of Http service')
-	parser.add_argument('--fraction', default=0.3, help='Usage rate of per GPU.')
+	parser.add_argument('--fraction', default=0.5, help='Usage rate of per GPU.')
 	parser.add_argument('--frontend_mode', default=3, help='Usage rate of per GPU.')
-	logger.info("test...")
-	logger.info("王德发...")
 
 	args = parser.parse_args()
 	os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
