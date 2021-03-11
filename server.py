@@ -1,24 +1,29 @@
+import logging
+
+_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+filename = "log/tts.log"
+fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
+fh.setFormatter(_format)
+sh = logging.StreamHandler()
+sh.setFormatter(_format)
+logging.getLogger().addHandler(fh)
+logging.getLogger().addHandler(sh)
 import argparse
-import base64
 import datetime
 import io
-import json
-import logging
 import os
-import re
-import traceback
-import uuid
+from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 import torch
-import tornado.web
-import tornado.ioloop
 import tornado.escape
-import tornado.options
+import tornado.ioloop
 import tornado.log
+import tornado.options
+import tornado.web
 from scipy.io import wavfile
 from tornado import gen
 from tornado.concurrent import run_on_executor
-from concurrent.futures import ThreadPoolExecutor
 
 from TTS.server.live_synthesizer import Synthesizer
 from tts_front.ChineseRhythmPredictor.models.bilstm_cbow_pred_jiang_test_haitian import BiLSTM
@@ -193,7 +198,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
 			logging.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
-			            period * 1000)
+			             period * 1000)
 			sentence_num = len(ch_rhy_list)
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
@@ -230,14 +235,6 @@ def norm(pcm_arr):
 
 
 if __name__ == "__main__":
-	_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	filename = "log/tts.log"
-	fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
-	fh.setFormatter(_format)
-	sh = logging.StreamHandler()
-	sh.setFormatter(_format)
-	logging.getLogger().addHandler(fh)
-	logging.getLogger().addHandler(sh)
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--taco_model', default='model/tacotron_model.ckpt-175000', help='Path to taco checkpoint')
