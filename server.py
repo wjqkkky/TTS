@@ -94,9 +94,9 @@ function getQueryVariable(variable)
 # use_options.log_file_prefix = str('./log/tts_server.log')
 # use_options.log_rotate_when = str('W0')
 # use_options.log_rotate_interval = 2
-fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
-logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
+# logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 # tornado.log.enable_pretty_logging(use_options)
 speakers_dic = {1: "haitian031", 2: "m2voc_S1female", 3: "niuman"}
 
@@ -230,6 +230,15 @@ def norm(pcm_arr):
 
 
 if __name__ == "__main__":
+	_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+	filename = "log/tts.log"
+	fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
+	fh.setFormatter(_format)
+	sh = logging.StreamHandler()
+	sh.setFormatter(_format)
+	logger = logging.getLogger().addHandler(fh)
+	logger = logging.getLogger().addHandler(sh)
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--taco_model', default='model/tacotron_model.ckpt-175000', help='Path to taco checkpoint')
 	parser.add_argument('--wavegrad_model', default='model/tacotron_model.ckpt-175000',
@@ -274,9 +283,6 @@ if __name__ == "__main__":
 		(r"/", MainHandler),
 		(r"//synthesize", SynHandler),
 	])
-	fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
-	logging.basicConfig(level=logging.INFO, handlers=[fh],
-	                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-	logger = logging.getLogger(__name__)
+
 	application.listen(int(args.port), xheaders=True)
 	tornado.ioloop.IOLoop.instance().start()
