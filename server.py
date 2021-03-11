@@ -104,7 +104,7 @@ class MainHandler(tornado.web.RequestHandler, object):
 
 
 class SynHandler(tornado.web.RequestHandler, object):
-	executor = ThreadPoolExecutor(10)
+	executor = ThreadPoolExecutor(1)
 
 	@gen.coroutine
 	def get(self):
@@ -199,10 +199,10 @@ class SynHandler(tornado.web.RequestHandler, object):
 				# start_time = datetime.datetime.now()
 				res = synth.synthesize(cur_phones, speaker)
 				# end_time = datetime.datetime.now()
-				period = round((end_time - start_time).total_seconds(), 3)
 				# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 			end_time = datetime.datetime.now()
+			period = round((end_time - start_time).total_seconds(), 3)
 			logger.info("Complete, Time consuming: [%sms]", period * 1000)
 		elif mode == 2:
 			start_time = datetime.datetime.now()

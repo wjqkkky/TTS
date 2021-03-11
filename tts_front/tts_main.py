@@ -110,7 +110,7 @@ def add_rhy(chinese:str,model):
             chinese_rhy_str = '#'.join(chinese_rhy[:-1])
             chinese_end = chinese_rhy[-1].replace('\n', '')
             if ',' in chinese_end[1:] or '。' in chinese_end[1:]:
-                if zhmodel.search(chinese_end):###判断最后一个#后是否含有汉字
+                if zhmodel.search(chinese_end) or chinese_end.isupper() or chinese_end.islower():###判断最后一个#后是否含有汉字
                     chinese_rhy_final = chinese_rhy_str+'#'+chinese_end[:-1]+'#2'+chinese_end[-1]
                 else:
                     chinese_rhy_final = chinese_rhy_str + '#2' + chinese_end[1:]
