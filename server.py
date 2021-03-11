@@ -1,13 +1,22 @@
+import sys
 import logging
+import tornado.log
+import tornado.options
 
-_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-filename = "log/tts.log"
-fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
-fh.setFormatter(_format)
-sh = logging.StreamHandler()
-sh.setFormatter(_format)
-logging.getLogger().addHandler(fh)
-logging.getLogger().addHandler(sh)
+use_options = tornado.options.options
+#
+use_options.log_to_stderr = True
+use_options.log_rotate_mode = 'time'
+use_options.log_file_prefix = './log/tts.log'
+use_options.log_rotate_when = 'W0'
+use_options.log_rotate_interval = 2
+
+logging.root.handlers = []
+FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
+logger = logging.getLogger(__name__)
+
+tornado.log.enable_pretty_logging(use_options)
 import argparse
 import datetime
 import io
@@ -119,7 +128,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 	def get(self):
 		try:
 			orig_text = self.get_argument('text')
-			logging.info("Receiving get request - [%s]", orig_text)
+			logger.info("Receiving get request - [%s]", orig_text)
 			mode = self.get_argument("mode", None, True)
 			if mode:
 				mode = int(mode)
@@ -137,7 +146,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.set_header("Content-Type", "audio/wav")
 			self.write(audio_stream.getvalue())
 		except Exception as e:
-			logging.exception(e)
+			logger.exception(e)
 
 	@gen.coroutine
 	def post(self):
@@ -146,7 +155,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 		try:
 			body_json = tornado.escape.json_decode(self.request.body)
 			text = body_json["text"]
-			logging.info("Receiving post request - [%s]", text)
+			logger.info("Receiving post request - [%s]", text)
 			mode = self.get_argument("mode", None, True)
 			if mode:
 				mode = int(mode)
@@ -165,7 +174,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			speaker = speakers_dic[voice]
 		except Exception as e:
 			self.set_header("Content-Type", "text/json;charset=UTF-8")
-			logging.exception(e)
+			logger.exception(e)
 			res["returnCode"] = 101
 			res["message"] = "Param Error"
 			self.finish(tornado.escape.json_encode(res))
@@ -177,7 +186,7 @@ class SynHandler(tornado.web.RequestHandler, object):
 			self.finish(audio_stream.getvalue())
 		except Exception as e:
 			self.set_header("Content-Type", "text/json;charset=UTF-8")
-			logging.exception(e)
+			logger.exception(e)
 			res["returnCode"] = 102
 			res["message"] = "Internal Server Error"
 			self.finish(tornado.escape.json_encode(res))
@@ -197,25 +206,25 @@ class SynHandler(tornado.web.RequestHandler, object):
 			ch_rhy_list, phone_list = split_text(text.strip())
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
-			logging.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
+			logger.info("Front-end split result: %s, %s. Time consuming: [%sms]", ch_rhy_list, phone_list,
 			             period * 1000)
 			sentence_num = len(ch_rhy_list)
 			for i in range(sentence_num):
 				cur_sentence = ch_rhy_list[i]
 				cur_phones = phone_list[i]
-				# logging.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
+				# logger.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
 				start_time = datetime.datetime.now()
 				res = synth.synthesize(cur_phones, speaker)
 				end_time = datetime.datetime.now()
 				period = round((end_time - start_time).total_seconds(), 3)
-				# logging.info("Sentence total time consuming - [%sms]", period * 1000)
+				# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 				pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		elif mode == 2:
 			start_time = datetime.datetime.now()
 			res = synth.synthesize(text, speaker)
 			end_time = datetime.datetime.now()
 			period = round((end_time - start_time).total_seconds(), 3)
-			# logging.info("Sentence total time consuming - [%sms]", period * 1000)
+			# logger.info("Sentence total time consuming - [%sms]", period * 1000)
 			pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
 		else:
 			raise Exception("Unknown mode : {}".format(mode))
@@ -274,8 +283,8 @@ if __name__ == "__main__":
 		synth = Synthesizer()
 		synth.load(taco_model_path, wavegrad_model_path, ebd_file_path, config_path, noise_schedule)
 	except Exception as e:
-		logging.exception(e)
-	logging.info("TTS service started...")
+		logger.exception(e)
+	logger.info("TTS service started...")
 	application = tornado.web.Application([
 		(r"/", MainHandler),
 		(r"//synthesize", SynHandler),
