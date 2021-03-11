@@ -2,21 +2,29 @@ import sys
 import logging
 import tornado.log
 import tornado.options
-
-use_options = tornado.options.options
 #
-use_options.log_to_stderr = True
-use_options.log_rotate_mode = 'time'
-use_options.log_file_prefix = './log/tts.log'
-use_options.log_rotate_when = 'W0'
-use_options.log_rotate_interval = 2
-
-logging.root.handlers = []
-FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
-logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
-logger = logging.getLogger(__name__)
-
-tornado.log.enable_pretty_logging(use_options)
+# use_options = tornado.options.options
+# #
+# use_options.log_to_stderr = True
+# use_options.log_rotate_mode = 'time'
+# use_options.log_file_prefix = './log/tts.log'
+# use_options.log_rotate_when = 'W0'
+# use_options.log_rotate_interval = 2
+#
+# logging.root.handlers = []
+# FORMAT = '[%(levelname)s: %(filename)s: %(lineno)4d]: %(message)s'
+# logging.basicConfig(level=logging.INFO, format=FORMAT, stream=sys.stdout)
+# logger = logging.getLogger(__name__)
+#
+# tornado.log.enable_pretty_logging(use_options)
+_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+filename = "log/tts.log"
+fh = logging.FileHandler(encoding='utf-8', mode='a', filename=filename)
+fh.setFormatter(_format)
+sh = logging.StreamHandler()
+sh.setFormatter(_format)
+logging.getLogger().addHandler(fh)
+logging.getLogger().addHandler(sh)
 import argparse
 import datetime
 import io
