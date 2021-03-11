@@ -88,8 +88,8 @@ function getQueryVariable(variable)
 </script></body></html>
 '''
 
-use_options = tornado.options.options
-use_options.log_to_stderr = True
+# use_options = tornado.options.options
+# use_options.log_to_stderr = True
 # use_options.log_rotate_mode = str('time')
 # use_options.log_file_prefix = str('./log/tts_server.log')
 # use_options.log_rotate_when = str('W0')
@@ -97,7 +97,7 @@ use_options.log_to_stderr = True
 fh = logging.FileHandler(encoding='utf-8', mode='a', filename="log/tts.log")
 logging.basicConfig(level=logging.INFO, handlers=[fh], format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-tornado.log.enable_pretty_logging(use_options)
+# tornado.log.enable_pretty_logging(use_options)
 speakers_dic = {1: "haitian031", 2: "m2voc_S1female", 3: "niuman"}
 
 
