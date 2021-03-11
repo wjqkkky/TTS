@@ -8,7 +8,8 @@
 # notes: python 2.X WILL fail or produce misleading results
 
 import sys, os, argparse, codecs, string, re
-
+import time
+import datetime
 
 from tts_front.change_tone import chinese_bian_diao_pinyin
 
@@ -624,18 +625,46 @@ class date2chn:
     def date2chnTochntext(self):
         dateNum = self.date2chn.split(':')
         if len(dateNum) == 2:
-            return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分'
+            try:
+                time_num = time.strptime(self.date2chn,'%H:%M')
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分'
+            except:
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'，'
         if len(dateNum) == 3:
-            return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分' +Cardinal(cardinal=dateNum[2]).cardinal2chntext() +'秒'
+            try:
+                time_num = time.strptime(self.date2chn, '%H:%M:%S')
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() +\
+                       '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分' +\
+                       Cardinal(cardinal=dateNum[2]).cardinal2chntext() +'秒'
+            except:
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','\
+                       + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '，'+Cardinal(cardinal=dateNum[2]).cardinal2chntext() + ','
+
 # ================================================================================ #
 #                            NSW Normalizer
 # ================================================================================ #
+
+def is_date(matcher,split_key):
+    numbers = re.split(split_key, matcher)
+    if len(numbers)==3:
+        try:
+            date_ = datetime.datetime.strptime(matcher,'%Y'+split_key+'%m'+split_key+'%d').date()
+            return str(date_.year)+'年'+str(date_.month)+'月'+str(date_.day)+'日'
+        except:
+            return numbers[0]+','+numbers[1]+','+numbers[2]
+    else:
+        if split_key=='-' and len(numbers)==2:
+            return numbers[0]+'至'+numbers[1]
+        elif split_key=='/' and len(numbers)==2:
+            return matcher
+        else:
+            return ','.join(numbers)
+
 class NSWNormalizer:
     def __init__(self, raw_text):
         # raw_text_split = raw_text.split('|')
         # self.raw_text = '^' + raw_text_split[1] + '$'
         self.raw_text='^'+raw_text+'$'
-        # self.row_num = raw_text_split[0]
         self.norm_text = ''
 
     def _particular(self):
@@ -651,22 +680,31 @@ class NSWNormalizer:
 
     def normalize(self):
         text = self.raw_text
-        # row_num = self.row_num
-        # Write_Text(file_name, row_num)
-        new_test = ''
+        #是否按照日期读取2021/3/5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开，若为两位，则11/12保持不变
+        pattern = re.compile(r'(\d+/\d+(/\d+)?)')
+        matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
+        for matcher in matchers:
+            date_result = is_date(matcher[0], '/')
+            text = text.replace(matcher[0], date_result)
+        ####匹配英文-英文的情况例如：e-tron
+        pattern = re.compile(r'([a-zA-Z]+-[a-zA-Z]+)')
+        matchers = pattern.findall(text)
+        for matcher in matchers:
+            text = text.replace(matcher, matcher.replace('-','*'))
 
+        # 是否按照日期读取2021-3-5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开,若为两位，则改为11-12改为11至12
+        pattern = re.compile(r'(\d+-\d+(-\d+)?)')
+        matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
+        for matcher in matchers:
+            date_result = is_date(matcher[0], '-')
+            text = text.replace(matcher[0], date_result)
         # 规范化日期
         pattern = re.compile(r"\D+((([089]\d|(19|20)\d{2})年)?(\d{1,2}月(\d{1,2}[日号])?)?)")
         matchers = pattern.findall(text)
-
         if matchers:
             for matcher in matchers:
-                if matcher[0]:
-                    # print('data', Date(date=matcher[0]).date2chntext())
-                    contant = (
-                    '[', 'data:', matcher[0], ',', Date(date=matcher[0]).date2chntext().encode('utf-8').decode('utf-8'),
-                    ']')
-                    # Write_Text(file_name, contant)
                 text = text.replace(matcher[0], Date(date=matcher[0]).date2chntext(), 1)
 
         # 规范化金钱
@@ -674,12 +712,7 @@ class NSWNormalizer:
         matchers = pattern.findall(text)
 
         if matchers:
-            # print('money', matchers)
             for matcher in matchers:
-                contant = (
-                '[', 'money:', matcher[0], ',', Money(money=matcher[0]).money2chntext().encode('utf-8').decode('utf-8'),
-                ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher[0], Money(money=matcher[0]).money2chntext(), 1)
 
         # 规范化固话/手机号码
@@ -691,33 +724,20 @@ class NSWNormalizer:
         pattern = re.compile(r"\D((\+?86 ?)?1([38]\d|5[0-35-9]|7[678]|9[89])\d{8})\D")
         matchers = pattern.findall(text)
         if matchers:
-            # print('telephone', matchers)
             for matcher in matchers:
-                contant = ('[', 'telephone:', matcher[0], ',',
-                           TelePhone(telephone=matcher[0]).telephone2chntext().encode('utf-8').decode('utf-8'), ']')
-
                 text = text.replace(matcher[0], TelePhone(telephone=matcher[0]).telephone2chntext(), 1)
         # 固话
         pattern = re.compile(r"\D((0(10|2[1-3]|[3-9]\d{2})-?)?[1-9]\d{6,7})\D")
         matchers = pattern.findall(text)
         if matchers:
-            # print('fixed telephone', matchers)
             for matcher in matchers:
-                contant = ('[', 'fixed telephone:', matcher[0], ',',
-                           TelePhone(telephone=matcher[0]).telephone2chntext(fixed=True).encode('utf-8').decode(
-                               'utf-8'), ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher[0], TelePhone(telephone=matcher[0]).telephone2chntext(fixed=True), 1)
 
         # 规范化分数
         pattern = re.compile(r"(\d+/\d+)")
         matchers = pattern.findall(text)
         if matchers:
-            # print('fraction', matchers)
             for matcher in matchers:
-                contant = ('[', 'fraction:', matcher, ',',
-                           Fraction(fraction=matcher).fraction2chntext().encode('utf-8').decode('utf-8'), ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher, Fraction(fraction=matcher).fraction2chntext(), 1)
 
         # 规范化百分数
@@ -725,21 +745,16 @@ class NSWNormalizer:
         pattern = re.compile(r"(\d+(\.\d+)?%)")
         matchers = pattern.findall(text)
         if matchers:
-            # print('percentage', matchers)
             for matcher in matchers:
-                contant = ('[', 'percentage:', matcher[0], ',',
-                           Percentage(percentage=matcher[0]).percentage2chntext().encode('utf-8').decode('utf-8'), ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher[0], Percentage(percentage=matcher[0]).percentage2chntext(), 1)
-        
         #规范化时间
         text = text.replace('：', ':')
         pattern = re.compile(r'(\d+:\d+(:\d+)?)')
         # pattern = re.compile(r"\D+(((\d+:)?(\d:(\d+)?)?)")
         matchers = pattern.findall(text)
+        matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
         if matchers:
             for matcher in matchers:
-                #print(matcher)
                 text =text.replace(matcher[0],date2chn(date2chn = matcher[0]).date2chnTochntext())
         ###规范化多个小数点
         pattern = re.compile(r'(\d+(\.\d+)+(\.\d+))')
@@ -762,53 +777,48 @@ class NSWNormalizer:
         matchers = pattern.findall(text)
         if matchers:
             for matcher in matchers:
-                contant = ('[', 'cardinal+quantifier:', matcher[0], ',',
-                           Cardinal(cardinal=matcher[0]).cardinal2chntext().encode('utf-8').decode('utf-8'), ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
 
         # 规范化数字编号
-        pattern = re.compile(r"(\d{4,32})")
+        pattern = re.compile(r"(\d{6,32})")
         matchers = pattern.findall(text)
         if matchers:
-            # print('digit', matchers)
             for matcher in matchers:
-                contant = (
-                '[', 'digit:', matcher, ',', Digit(digit=matcher).digit2chntext().encode('utf-8').decode('utf-8'), ']')
-                # Write_Text(file_name, contant)
                 text = text.replace(matcher, Digit(digit=matcher).digit2chntext(), 1)
 
         # 规范化纯数
 
-        ####
-        # matchers=re.findall(r"(.*?)[[](.*?)[]]", text)
-        matchers = re.findall('((.)\[.*?\])', text)
-
-        ####
+        # ####
+        # # matchers=re.findall(r"(.*?)[[](.*?)[]]", text)
+        # matchers = re.findall('((.)\[.*?\])', text)
+        # # matchers = re.findall('\d+', text)
+        # ####
+        # if matchers:
+        #     for matcher in matchers:
+        #         if '=' in matcher[0]:
+        #             if '5' in matcher[0]:
+        #
+        #                 text = text.replace(matcher[0], '['+matcher[0][3:-2] +']'+ ' ')
+        #             else:
+        #                 text = text.replace(matcher[0], '['+matcher[0][3:-1] +']'+ ' ')
+        #         else:
+        #             if '5' in matcher[0]:
+        #                 text = text.replace(matcher[0], '['+matcher[0][2:-2] +']'+ ' ')
+        #             else:
+        #                 text = text.replace(matcher[0], '['+matcher[0][2:-1] +']'+ ' ')
+        #
+        # else:
+        pattern = re.compile(r"(\d+(\.\d+)?)")
+        matchers = pattern.findall(text)
         if matchers:
             for matcher in matchers:
-                if '=' in matcher[0]:
-                    if '5' in matcher[0]:
-
-                        text = text.replace(matcher[0], '['+matcher[0][3:-2] +']'+ ' ')
-                    else:
-                        text = text.replace(matcher[0], '['+matcher[0][3:-1] +']'+ ' ')
+                if '号' in text[:text.index(matcher[0])]:
+                    text = text.replace(matcher[0], Digit(digit=matcher[0]).digit2chntext(), 1)
+                    # text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
+                # elif len(matcher[0])>5:
+                #     text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
                 else:
-                    if '5' in matcher[0]:
-                        text = text.replace(matcher[0], '['+matcher[0][2:-2] +']'+ ' ')
-                    else:
-                        text = text.replace(matcher[0], '['+matcher[0][2:-1] +']'+ ' ')
-
-        else:
-            pattern = re.compile(r"(\d+(\.\d+)?)")
-            matchers = pattern.findall(text)
-            if matchers:
-                # print('cardinal',matchers)
-                for matcher in matchers:
-                    contant = ('[', 'cardinal:', matcher[0], ',',
-                               Cardinal(cardinal=matcher[0]).cardinal2chntext().encode('utf-8').decode('utf-8'), ']')
-
-                    text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
+                    text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(),1)
 
         self.norm_text = text
         # self._particular()#这个函数是*2*的一串匹配字符将二改为2
@@ -869,6 +879,6 @@ def chinese2pinyin(chinese_input):
     return chinese_normal,pinyin
 if __name__=='__main__':
     # test = '新车搭载代号LT2.33.44.23.2的6.2.四2LV8发动机'
-    test = '长宽高分别为5172/1993/1738'
+    test = '买U盘是爱国者64G，两头头是Type-c头是电脑端那种。'
     chinese = NSWNormalizer(test).normalize()
     print(chinese)

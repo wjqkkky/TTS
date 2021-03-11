@@ -89,6 +89,28 @@ def split_chinese_eng(string:str):
                 str_word=ph
     list_final.append(str_word)
     return list_final
+def firt_word_flag_after_a(i,list_final):
+    '''
+    检查a后第一个单词或者汉字，若为单词则为False按照AH0读，若为汉字或者字符则为True按照EA1读
+    :param i: a所在的索引
+    :param list_final: 中英文分割后的列表
+    :return:按照单词读为False，按照字母读为True
+    '''
+    zhmodel = re.compile(u'[\u4e00-\u9fa5]')
+    i = i + 1
+    while i < len(list_final):
+        if list_final[i].isupper() or list_final[i].islower():
+            if len(list_final[i])>1 and (d.check(list_final[i]) or d.check(list_final[i].title())):
+                return False
+            else:
+                return True
+        else:
+            match = zhmodel.search(list_final[i])
+            if match:
+                return True
+        i = i + 1
+    return True
+
 def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
     '''
     将单独的英文和中文转化为音素
@@ -96,18 +118,20 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
     :return:中英文分割后的列表转化为音素
     '''
     phone_final = []
+    zimu_read=['a','it','led','mm','id']
     ###中文转化为拼音，英文转化为音素
-    for word in list_final:
-
+    for i,word in enumerate(list_final):
         if word[0].islower() or word[0].isupper():
             # if word in words.words():
             flag_check = d.check(word) or d.check(word.title())  ###True为单词，False为字母
             # flag_check = False  #仅仅处理为字母，全部按照字母读
+            if (word.lower() in zimu_read)and firt_word_flag_after_a(i, list_final):
+                flag_check=False
             if flag_check:
                 # en_phone = g2p(word)
                 en_phone = pronouncing.phones_for_word(word)
                 # phone_tem = ' '.join(en_phone)
-                if len(en_phone) == 0:
+                if len(en_phone) == 0 or (not en_phone[0].isupper()):
                     word = word.upper()
                     phone_tem_zimu = []
                     for w in word:
@@ -123,10 +147,12 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
                 # if word in words.words():###判断是否为英文单词
                 flag_check = d.check(word)  ###True为单词，False为字母
                 # flag_check=False##全部按照字母读
+                if (word.lower() in zimu_read ) and firt_word_flag_after_a(i, list_final):
+                    flag_check = False
                 if flag_check:
                     # en_phone = g2p(word)
                     en_phone = pronouncing.phones_for_word(word)
-                    if len(en_phone) == 0:
+                    if len(en_phone) == 0 or (not en_phone[0].isupper()):
                         word = word.upper()
                         phone_tem_zimu = []
                         for w in word:
@@ -151,13 +177,25 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
                 continue
             else:
                 pattern = '#1|#2|#3|#4'
+                pattern1 = '#'
+                string_lists_with_rhy_num=re.split(pattern1, word)
                 no_rhy_chinese=re.sub(pattern=pattern,repl='',string=word)
                 string_phone = ch2py(no_rhy_chinese, u2v=chinese_u2v)
                 split_string_phone = string_phone.split()
                 string_lists = re.split(pattern, word)
-                phone_list = []
+                # phone_list = []
+                phone_tem = ''
                 index_now = 0
-                for string_list in string_lists:
+                first_flag = 0
+                for i in range(len(string_lists)):
+                    # if first_flag:
+                    #     rhy_num = string_list[0]
+                    #     string_list = string_list[1:]
+                    if first_flag:
+                        rhy_num = string_lists_with_rhy_num[i][0]
+                        string_list = string_lists_with_rhy_num[i][1:]
+                    else:
+                        string_list = string_lists_with_rhy_num[i]
                     if '儿' in string_list:
                         string_phone_temp = ch2py(string_list,u2v=False)
                         string_phone = ' '.join(split_string_phone[index_now:index_now + len(string_phone_temp.split())])
@@ -168,9 +206,15 @@ def trans2phone(list_final:list,chinese_split=True,chinese_u2v=True):
 
                     if chinese_split:
                         string_phone = split_phoneme.split_sheng(string_phone)
+                    if first_flag:
+                        # phone_list.append(' #'+rhy_num+' '+string_phone)
+                        phone_tem =phone_tem + ' #'+rhy_num+' '+string_phone
+                    else:
+                        phone_tem = phone_tem +string_phone
+                        # phone_list.append(string_phone)
 
-                    phone_list.append(string_phone)
-                phone_tem = ' #1 '.join(phone_list)
+                    first_flag = 1
+                # phone_tem = ' #1 '.join(phone_list)
         phone_final.append(phone_tem)
     return phone_final
 def add_ch_en_segment_sgin(phone_final):
@@ -272,7 +316,7 @@ def word2phone1(string):
                 # en_phone = g2p(word)
                 en_phone = pronouncing.phones_for_word(word)
                 # phone_tem = ' '.join(en_phone)
-                if len(en_phone) == 0:
+                if len(en_phone) == 0 or (not en_phone[0].isupper()):
                     word = word.upper()
                     phone_tem_zimu = []
                     for w in word:
@@ -291,7 +335,7 @@ def word2phone1(string):
                 if flag_check:
                     # en_phone = g2p(word)
                     en_phone = pronouncing.phones_for_word(word)
-                    if len(en_phone)==0:
+                    if len(en_phone)==0 or (not en_phone[0].isupper()):
                         word = word.upper()
                         phone_tem_zimu = []
                         for w in word:
@@ -315,13 +359,22 @@ def word2phone1(string):
             if word==' ':
                 continue
             else:
-                pattern = '#1|#2|#3|#4'
+                # pattern = '#1|#2|#3|#4'
+                pattern='#'
                 string_lists = re.split(pattern, word)
-                phone_list = []
+                # phone_list = []
+                phone_tem = ''
+                firt_flag = 1
                 for string_list in string_lists:
-                    string_phone = ch2py(string_list,split=False)
-                    phone_list.append(string_phone)
-                phone_tem = ' #1 '.join(phone_list)
+                    if firt_flag:
+                        string_phone = ch2py(string_list,split=False)
+                        firt_flag=0
+                        phone_tem = phone_tem+string_phone
+                    else:
+                    # phone_list.append(string_phone)
+                        string_phone = ch2py(string_list[1:], split=False)
+                        phone_tem = phone_tem + ' #'+string_list[0]+' '+string_phone
+                # phone_tem = ' #1 '.join(phone_list)
         phone_final.append(phone_tem)
     # print(phone_final)
     #####添加中英文分割符号
@@ -381,7 +434,7 @@ def word2phone1(string):
     return phone_str
 
 if __name__=='__main__':
-    string = "晚会#1彩排#3，欢迎#2各位#1朋友#2参加#1party#4。"
+    string = "To say a few words on the principles of design in typography ."
     # string = string.replace('#2','').replace('#1','').replace('#3','').replace('#4','')
     print(word2phone(string))
 

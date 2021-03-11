@@ -85,7 +85,7 @@ class PinyinResource(object):
     @staticmethod
     def getWordPinyinResource():
         resource = {}
-        wordFiles = ['mutil_pinyin.db', 'phrase.db']
+        wordFiles = ['mutil_pinyin.db', 'phrase.db','source_pypinyin.db','source_phkit.db']
         wordFiles = [os.path.join(CURRENT_DIR, 'data', fname) for fname in wordFiles]
 
         for fpath in wordFiles:

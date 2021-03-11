@@ -1,6 +1,8 @@
 '''
     model with CWS and pos information
 '''
+import warnings
+warnings.filterwarnings('ignore')
 import sys
 sys.path.append("..")
 from tts_front.ChineseRhythmPredictor import util
@@ -17,10 +19,13 @@ import re
 from sklearn.metrics import f1_score
 
 import sys
-import codecs
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-sys.stdout.write("Your content....")
+# import codecs
+# sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+# sys.stdout.write("Your content....")
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+# tf.logging.set_verbosity(tf.logging.ERROR)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #指定显卡
 os.environ['CUDA_VISIBLE_DEVICES']='2'
