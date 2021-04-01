@@ -352,7 +352,7 @@ def num2chn(number_string, numbering_type=NUMBERING_TYPES[1], big=False,
     system = create_system(numbering_type)
 
     int_dec = number_string.split('.')
-    if int_dec[0]=='00':
+    if int_dec[0] == '00':
         return '零'
     if len(int_dec) == 1:
         int_string = int_dec[0]
@@ -440,18 +440,20 @@ class Cardinal:
 
     def cardinal2chntext(self):
         return num2chn(self.cardinal)
+
     def mult2chntext(self):
         lists_split = self.cardinal.split('.')
-        begin=1
+        begin = 1
         mu2text = ''
         for list_split in lists_split:
             temp = num2chn(list_split, alt_two=False, use_units=False)
             if begin:
-                mu2text=temp
-                begin=0
+                mu2text = temp
+                begin = 0
             else:
-                mu2text = mu2text+'点'+temp
+                mu2text = mu2text + '点' + temp
         return mu2text
+
 
 class Digit:
     """
@@ -616,55 +618,67 @@ class Percentage:
 
     def percentage2chntext(self):
         return '百分之' + num2chn(self.percentage.strip().strip('%'))
+
+
 class date2chn:
-    '''
+    """
     时间类
-    '''
-    def __init__(self,date2chn):
+    """
+
+    def __init__(self, date2chn):
         self.date2chn = date2chn
+
     def date2chnTochntext(self):
         dateNum = self.date2chn.split(':')
         if len(dateNum) == 2:
             try:
-                time_num = time.strptime(self.date2chn,'%H:%M')
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分'
+                time_num = time.strptime(self.date2chn, '%H:%M')
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点' + Cardinal(
+                    cardinal=dateNum[1]).cardinal2chntext() + '分'
             except:
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'，'
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ',' + Cardinal(
+                    cardinal=dateNum[1]).cardinal2chntext() + '，'
         if len(dateNum) == 3:
             try:
                 time_num = time.strptime(self.date2chn, '%H:%M:%S')
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() +\
-                       '点'+ Cardinal(cardinal=dateNum[1]).cardinal2chntext() +'分' +\
-                       Cardinal(cardinal=dateNum[2]).cardinal2chntext() +'秒'
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + \
+                       '点' + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '分' + \
+                       Cardinal(cardinal=dateNum[2]).cardinal2chntext() + '秒'
             except:
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ','\
-                       + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '，'+Cardinal(cardinal=dateNum[2]).cardinal2chntext() + ','
+                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ',' \
+                       + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '，' + Cardinal(
+                    cardinal=dateNum[2]).cardinal2chntext() + ','
+
 
 # ================================================================================ #
 #                            NSW Normalizer
 # ================================================================================ #
 
-def is_date(matcher,split_key):
+def is_date(matcher, split_key):
     numbers = re.split(split_key, matcher)
-    if len(numbers)==3:
+    if len(numbers) == 3:
         try:
-            date_ = datetime.datetime.strptime(matcher,'%Y'+split_key+'%m'+split_key+'%d').date()
-            return str(date_.year)+'年'+str(date_.month)+'月'+str(date_.day)+'日'
+            date_ = datetime.datetime.strptime(matcher, '%Y' + split_key + '%m' + split_key + '%d').date()
+            return str(date_.year) + '年' + str(date_.month) + '月' + str(date_.day) + '日'
         except:
-            return numbers[0]+','+numbers[1]+','+numbers[2]
+            return numbers[0] + ',' + numbers[1] + ',' + numbers[2]
     else:
-        if split_key=='-' and len(numbers)==2:
-            return numbers[0]+'至'+numbers[1]
-        elif split_key=='/' and len(numbers)==2:
+        if split_key == '-' and len(numbers) == 2:
+            # if int(numbers[0])>5 or int(numbers[1])>5:
+            #     return numbers[0] + numbers[1]
+            # else:
+            return numbers[0] + '至' + numbers[1]
+        elif split_key == '/' and len(numbers) == 2:
             return matcher
         else:
             return ','.join(numbers)
+
 
 class NSWNormalizer:
     def __init__(self, raw_text):
         # raw_text_split = raw_text.split('|')
         # self.raw_text = '^' + raw_text_split[1] + '$'
-        self.raw_text='^'+raw_text+'$'
+        self.raw_text = '^' + raw_text + '$'
         self.norm_text = ''
 
     def _particular(self):
@@ -680,7 +694,7 @@ class NSWNormalizer:
 
     def normalize(self):
         text = self.raw_text
-        #是否按照日期读取2021/3/5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开，若为两位，则11/12保持不变
+        # 是否按照日期读取2021/3/5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开，若为两位，则11/12保持不变
         pattern = re.compile(r'(\d+/\d+(/\d+)?)')
         matchers = pattern.findall(text)
         matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
@@ -688,10 +702,10 @@ class NSWNormalizer:
             date_result = is_date(matcher[0], '/')
             text = text.replace(matcher[0], date_result)
         ####匹配英文-英文的情况例如：e-tron
-        pattern = re.compile(r'([a-zA-Z]+-[a-zA-Z]+)')
+        pattern = re.compile(r'([a-zA-Z]+-[a-zA-Z0-9]+)')
         matchers = pattern.findall(text)
         for matcher in matchers:
-            text = text.replace(matcher, matcher.replace('-','*'))
+            text = text.replace(matcher, matcher.replace('-', '*'))
 
         # 是否按照日期读取2021-3-5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开,若为两位，则改为11-12改为11至12
         pattern = re.compile(r'(\d+-\d+(-\d+)?)')
@@ -747,7 +761,7 @@ class NSWNormalizer:
         if matchers:
             for matcher in matchers:
                 text = text.replace(matcher[0], Percentage(percentage=matcher[0]).percentage2chntext(), 1)
-        #规范化时间
+        # 规范化时间
         text = text.replace('：', ':')
         pattern = re.compile(r'(\d+:\d+(:\d+)?)')
         # pattern = re.compile(r"\D+(((\d+:)?(\d:(\d+)?)?)")
@@ -755,22 +769,21 @@ class NSWNormalizer:
         matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
         if matchers:
             for matcher in matchers:
-                text =text.replace(matcher[0],date2chn(date2chn = matcher[0]).date2chnTochntext())
-        ###规范化多个小数点
+                text = text.replace(matcher[0], date2chn(date2chn=matcher[0]).date2chnTochntext())
+        # ##规范化多个小数点
         pattern = re.compile(r'(\d+(\.\d+)+(\.\d+))')
         matchers = pattern.findall(text)
         if matchers:
             for matcher in matchers:
                 text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).mult2chntext())
 
-
-        #小数匹配
+        # 小数匹配
         # pattern = re.compile(r'(\d+(\.\d+)?)')
         pattern = re.compile(r'(\d+(\.\d+))')
         matchers = pattern.findall(text)
         if matchers:
-             for matcher in matchers:
-                  text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext())
+            for matcher in matchers:
+                text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext())
 
         # 规范化纯数+量词
         pattern = re.compile(r"(\d+(\.\d+)?)[多余几]?" + COM_QUANTIFIERS)
@@ -818,7 +831,7 @@ class NSWNormalizer:
                 # elif len(matcher[0])>5:
                 #     text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
                 else:
-                    text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(),1)
+                    text = text.replace(matcher[0], Cardinal(cardinal=matcher[0]).cardinal2chntext(), 1)
 
         self.norm_text = text
         # self._particular()#这个函数是*2*的一串匹配字符将二改为2
@@ -848,37 +861,12 @@ def nsw_test():
     nsw_test_case('今天吃了115个小笼包231个馒头')
     nsw_test_case('有62％的概率')
 
+
 # if __name__ == '__main__':
 #     nsw_test()
 
 
-def chinese2pinyin(chinese_input):
-
-    chineses = chinese_input.split('#')
-    pinyin=''
-    chinese_normal = ''
-    for chinese_index in range(0,len(chineses)):
-        if chinese_index ==0:
-            chinese = NSWNormalizer(chineses[chinese_index]).normalize()
-            chinese = chinese.replace('%', '').replace('％', '').replace('：', '#1,').replace(':', '#1,')
-            chinese_normal = chinese_normal+chinese
-            pinyin_temp = chinese_bian_diao_pinyin(chinese)
-            pinyin_temp = pinyin_temp.replace('# 1','#1')
-            pinyin = pinyin + pinyin_temp
-        else:
-            chinese = NSWNormalizer(chineses[chinese_index][1:]).normalize()
-            chinese = chinese.replace('%','').replace('％','').replace('：','#1,').replace(':','#1,')
-            chinese_normal = chinese_normal+'#'+chineses[chinese_index][0]+chinese
-            pinyin_temp = chinese_bian_diao_pinyin(chinese)
-            pinyin_temp = pinyin_temp.replace('# 1', '#1')
-            if pinyin_temp:
-                pinyin = pinyin + ' #'+chineses[chinese_index][0]+' '+pinyin_temp
-            else:
-                pinyin = pinyin+' #'+chineses[chinese_index][0]+' '
-
-    return chinese_normal,pinyin
-if __name__=='__main__':
-    # test = '新车搭载代号LT2.33.44.23.2的6.2.四2LV8发动机'
-    test = '买U盘是爱国者64G，两头头是Type-c头是电脑端那种。'
+if __name__ == '__main__':
+    test = '填写耗时约10-30分钟，'
     chinese = NSWNormalizer(test).normalize()
     print(chinese)

@@ -28,7 +28,7 @@ import sys
 # os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #指定显卡
-os.environ['CUDA_VISIBLE_DEVICES']='2'
+# os.environ['CUDA_VISIBLE_DEVICES']='2'
 config=tf.ConfigProto()
 config.gpu_options.allow_growth=True
 
@@ -598,8 +598,8 @@ class BiLSTM():
         doc = util.recover2(
             X=X_test,
             preds_pw=pred_pw,
-            preds_pph=pred_pph,
-            filename="./tts_front/ChineseRhythmPredictor/result/" + str(1111) + ".txt"
+            preds_pph=pred_pph
+            # filename="./tts_front/ChineseRhythmPredictor/result/" + str(1111) + ".txt"
         )
         return doc
     # 返回预测的结果或者准确率,y not None的时候返回准确率,y ==None的时候返回预测值

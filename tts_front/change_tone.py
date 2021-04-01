@@ -38,7 +38,7 @@ def is_have_con(text_pinyin: str, tone: str, text_chinese: str):
     return bian_diao_list
 
 
-def san_san_bian_diao(chinese_sentence_pinyin: str, list_modified_tone: list,san_tone_now):
+def san_san_bian_diao(chinese_sentence_pinyin: str, list_modified_tone: list, san_tone_now):
     '''
     三三变调，以词为单位，当一个词中有两个三声或者三个三声，变调
     :param chinese_sentence_pinyin:汉语句子的拼音
@@ -68,7 +68,7 @@ def san_san_bian_diao(chinese_sentence_pinyin: str, list_modified_tone: list,san
     return chinese_sentence_pinyin
 
 
-def san_san_all_sentence(chinese_sentence_pinyin: str, list_index_san_tone: list, chinese,san_tone_now):
+def san_san_all_sentence(chinese_sentence_pinyin: str, list_index_san_tone: list, chinese, san_tone_now):
     '''
     整个句子单字三三变调，规则，两个
     :param chinese_sentence_pinyin: 汉语句子拼音
@@ -77,7 +77,6 @@ def san_san_all_sentence(chinese_sentence_pinyin: str, list_index_san_tone: list
     :return: 变调后的拼音
     '''
     split_pinyin = chinese_sentence_pinyin.split()
-    # san_tone_now = '2'
     for index_san_tone in range((len(list_index_san_tone) - 1), -1, -1):
         if list_index_san_tone[index_san_tone] > 2:
             _, pos = \
@@ -108,6 +107,12 @@ def san_san_all_sentence(chinese_sentence_pinyin: str, list_index_san_tone: list
 
 
 def find_index(word: str, key_word: str):
+    '''
+    查找key_word在字符串word中出现的位置
+    :param word: 待查找的字符串
+    :param key_word: 待查找的关键字
+    :return: 关键字出现的索引列表
+    '''
     index_list = []
     for i in range(0, len(word)):
         if word[i] == key_word:
@@ -125,20 +130,22 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
     :param order_yi:一的次序
     :return:变调完的句子汉语拼音
     '''
-    number_list = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','月','日','流',',','。','，','不','至']
-    number_=['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十','点','之','比','不','至']
+    number_list = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '月', '日', '流', ',', '。', '，', '.', '不', '至',
+                   '汽']
+    number_ = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '点', '之', '比', '不', '至']
     all_index_list_yi = find_index(text_chinese, '一')
     split_chinese_sentence_pinyin = chinese_sentence_pinyin.split()
     if len(word) > 1:
         index_list_yi = find_index(word, '一')
         # num_yi=0
-        order_yi=order_yi-len(index_list_yi)
+        order_yi = order_yi - len(index_list_yi)
         for index_yi in index_list_yi:
-            order_yi=order_yi+1
+            order_yi = order_yi + 1
             if index_yi == len(word) - 1:
                 return chinese_sentence_pinyin
                 # continue
-            if (index_yi<len(word)-1 and word[index_yi + 1] in number_list) or (index_yi>0 and word[index_yi - 1] in number_list):
+            if (index_yi < len(word) - 1 and word[index_yi + 1] in number_list) or (
+                    index_yi > 0 and word[index_yi - 1] in number_list):
                 continue
             if len(word) == 3 and word[index_yi - 1] == word[index_yi + 1] and index_yi == 2:
                 split_temp = split_pinyin.replace('yi1', 'yi5')
@@ -149,7 +156,6 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
             if '第一' in word:
                 continue
 
-
             split_before = ' '.join(
                 split_chinese_sentence_pinyin[all_index_list_yi[order_yi - 1]:(all_index_list_yi[order_yi - 1] + 2)])
 
@@ -158,12 +164,14 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
                 # chinese_sentence_pinyin = chinese_sentence_pinyin.replace(split_before, split_temp)
             else:
                 # if text_chinese=='一点' and
-                if len(text_chinese)< 2 :
+                if len(text_chinese) < 2:
                     continue
-                if all_index_list_yi[order_yi - 1]>0 and text_chinese[all_index_list_yi[order_yi - 1]-1] =='第':
+                if all_index_list_yi[order_yi - 1] > 0 and text_chinese[all_index_list_yi[order_yi - 1] - 1] == '第':
                     continue
-                if all_index_list_yi[order_yi - 1] + 2<len(text_chinese):
-                    if word == '一点' and text_chinese[all_index_list_yi[order_yi - 1] + 2] in number_list:
+                if all_index_list_yi[order_yi - 1] + 2 < len(text_chinese):
+                    # word[index_list_yi[order_yi - 1]:index_list_yi[order_yi - 1] + 2] == '一点'
+                    if word[index_yi:index_yi + 2] == '一点' and (
+                            text_chinese[all_index_list_yi[order_yi - 1] + 2] in number_list):
                         continue
                     else:
                         split_temp = split_before.replace('yi1', 'yi4')
@@ -178,7 +186,6 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
         if all_index_list_yi[order_yi - 1] != len(split_chinese_sentence_pinyin) - 1:
             # if all_index_list_yi[order_yi - 1]>0:
             #     if text_chinese[all_index_list_yi[order_yi - 1] -1] not in number_ and text_chinese[all_index_list_yi[order_yi - 1] +1] not in number_:
-
 
             if split_chinese_sentence_pinyin[all_index_list_yi[order_yi - 1] + 1][-1] == '4':
                 # split_before =split_chinese_sentence_pinyin[all_index_list_yi[order_yi - 1]]+' '+ split_chinese_sentence_pinyin[all_index_list_yi[order_yi - 1] + 1]
@@ -196,8 +203,8 @@ def yi_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
         if before_yi in number_ or after_yi in number_list:
             chinese_sentence_pinyin = chinese_sentence_pinyin.split()
             chinese_sentence_pinyin[all_index_list_yi[order_yi - 1]] = 'yi1'
-            if text_chinese[all_index_list_yi[order_yi-1]-1]=='一':
-                chinese_sentence_pinyin[all_index_list_yi[order_yi-1]-1]='yi1'
+            if text_chinese[all_index_list_yi[order_yi - 1] - 1] == '一':
+                chinese_sentence_pinyin[all_index_list_yi[order_yi - 1] - 1] = 'yi1'
             chinese_sentence_pinyin = ' '.join(chinese_sentence_pinyin)
 
     return chinese_sentence_pinyin
@@ -216,7 +223,7 @@ def bu_bian_diao(chinese_sentence_pinyin: str, word: str, split_pinyin: str, tex
         for index_bu in index_list_bu:
             if index_bu == len(word) - 1:
                 return chinese_sentence_pinyin
-            if len(word) == 3 and word[1] =='不' and word[index_bu - 1] == word[index_bu + 1]:
+            if len(word) == 3 and word[1] == '不' and word[index_bu - 1] == word[index_bu + 1]:
                 split_temp = split_pinyin.replace('bu4', 'bu5')
                 chinese_sentence_pinyin = chinese_sentence_pinyin.replace(split_pinyin, split_temp)
                 return chinese_sentence_pinyin
@@ -257,7 +264,7 @@ def rhotic_accent(chinese_sentence_pinyin: str, chinese: str):
     return chinese_sentence_pinyin
 
 
-def chinese_bian_diao_pinyin(chinese: str,flag_san_san_key=False):
+def chinese_bian_diao_pinyin(chinese: object, flag_san_san_key: object = False) -> object:
     # chinese = '起火现场消防员正在救火'
     split_chineses = list(jieba.cut(chinese))
     chinese_sentence_pinyin_split = PinyinHelper.convertToPinyinFromSentence(chinese,
@@ -292,12 +299,12 @@ def chinese_bian_diao_pinyin(chinese: str,flag_san_san_key=False):
 
     if flag_san_san_key:
         san_tone_now = '6'
-        final_pinyin = san_san_bian_diao(chinese_sentence_pinyin, list_modified_tone,san_tone_now)
+        final_pinyin = san_san_bian_diao(chinese_sentence_pinyin, list_modified_tone, san_tone_now)
 
-        result = san_san_all_sentence(final_pinyin, san_dan_word, chinese,san_tone_now)
+        result = san_san_all_sentence(final_pinyin, san_dan_word, chinese, san_tone_now)
     else:
-        result=chinese_sentence_pinyin
-    result = rhotic_accent(result,chinese)
+        result = chinese_sentence_pinyin
+    result = rhotic_accent(result, chinese)
     return result
 
 
