@@ -199,14 +199,10 @@ class SynHandler(tornado.web.RequestHandler, object):
             sentence_num = len(ch_rhy_list)
             start_time = datetime.datetime.now()
             for i in range(sentence_num):
-                cur_sentence = ch_rhy_list[i]
+                # cur_sentence = ch_rhy_list[i]
                 cur_phones = phone_list[i]
-                # logging.info("Inference sentence: [%s], phones: [%s]", cur_sentence, cur_phones)
-                # start_time = datetime.datetime.now()
                 res = synth.synthesize(cur_phones, speaker)
-                # end_time = datetime.datetime.now()
-                # logging.info("Sentence total time consuming - [%sms]", period * 1000)
-                pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
+                pcms = concat_pcm_arr(pcms, res)
             end_time = datetime.datetime.now()
             period = round((end_time - start_time).total_seconds(), 3)
             logging.info("Complete, Time consuming: [%sms]", period * 1000)
@@ -215,11 +211,17 @@ class SynHandler(tornado.web.RequestHandler, object):
             res = synth.synthesize(text, speaker)
             end_time = datetime.datetime.now()
             period = round((end_time - start_time).total_seconds(), 3)
-            pcms = np.concatenate((pcms, np.zeros(4000, dtype=np.float32), res))
+            pcms = concat_pcm_arr(pcms, res)
             logging.info("Complete, Time consuming: [%sms]", period * 1000)
         else:
             raise Exception("Unknown mode : {}".format(mode))
         return pcms
+
+
+def concat_pcm_arr(arr_1, arr_2):
+    arr_tup = (arr_1, np.zeros(4000, dtype=np.float32), arr_2)
+    new_pcm_arr = np.concatenate(arr_tup)
+    return new_pcm_arr
 
 
 def split_text(text):
@@ -249,7 +251,7 @@ if __name__ == "__main__":
     parser.add_argument('--port', default=16006, help='Port of Http service')
     parser.add_argument('--host', default="0.0.0.0", help='Host of Http service')
     parser.add_argument('--fraction', default=0.5, help='Usage rate of per GPU.')
-    parser.add_argument('--frontend_mode', default=3, help='Usage rate of per GPU.')
+    parser.add_argument('--frontend_mode', default=1, help='Usage rate of per GPU.')
 
     args = parser.parse_args()
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
