@@ -215,11 +215,11 @@ class SynHandler(tornado.web.RequestHandler, object):
             logging.info("Complete, Time consuming: [%sms]", period * 1000)
         else:
             raise Exception("Unknown mode : {}".format(mode))
-        return pcms
+        return pcms.copy()
 
 
 def concat_pcm_arr(arr_1, arr_2):
-    arr_tup = (arr_1, np.zeros(4000, dtype=np.float32), arr_2)
+    arr_tup = (arr_1.copy(), np.zeros(4000, dtype=np.float32), arr_2.copy())
     new_pcm_arr = np.concatenate(arr_tup)
     return new_pcm_arr
 
