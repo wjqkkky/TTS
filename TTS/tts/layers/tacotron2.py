@@ -18,6 +18,7 @@ class ConvBNBlock(nn.Module):
         - input: (B, C_in, T)
         - output: (B, C_out, T)
     """
+
     def __init__(self, in_channels, out_channels, kernel_size, activation=None):
         super(ConvBNBlock, self).__init__()
         assert (kernel_size - 1) % 2 == 0
@@ -53,6 +54,7 @@ class Postnet(nn.Module):
         - input: (B, C_in, T)
         - output: (B, C_in, T)
     """
+
     def __init__(self, in_out_channels, num_convs=5):
         super(Postnet, self).__init__()
         self.convolutions = nn.ModuleList()
@@ -81,6 +83,7 @@ class Encoder(nn.Module):
         - input: (B, C_in, T)
         - output: (B, C_in, T)
     """
+
     def __init__(self, in_out_channels=512):
         super(Encoder, self).__init__()
         self.convolutions = nn.ModuleList()
@@ -142,8 +145,9 @@ class Decoder(nn.Module):
         separate_stopnet (bool): if true, detach stopnet input to prevent gradient flow.
         speaker_embedding_dim (int): size of speaker embedding vector, for multi-speaker training.
     """
+
     # Pylint gets confused by PyTorch conventions here
-    #pylint: disable=attribute-defined-outside-init
+    # pylint: disable=attribute-defined-outside-init
     def __init__(self, in_channels, frame_channels, r, attn_type, attn_win, attn_norm,
                  prenet_type, prenet_dropout, forward_attn, trans_agent,
                  forward_attn_mask, location_attn, attn_K, separate_stopnet):
@@ -211,7 +215,7 @@ class Decoder(nn.Module):
     def get_go_frame(self, inputs):
         B = inputs.size(0)
         memory = torch.zeros(1, device=inputs.device).repeat(B,
-                             self.frame_channels * self.r)
+                                                             self.frame_channels * self.r)
         return memory
 
     def _init_states(self, inputs, mask, keep_states=False):
@@ -332,7 +336,6 @@ class Decoder(nn.Module):
             outputs, stop_tokens, alignments)
         return outputs, alignments, stop_tokens
 
-
     def inference(self, inputs):
         r"""Decoder inference without teacher forcing and use
         Stopnet to stop decoder.
@@ -364,8 +367,8 @@ class Decoder(nn.Module):
             if stop_token > self.stop_threshold and t > inputs.shape[0] // 2:
                 break
             if len(outputs) == self.max_decoder_steps:
-                print("   | > Decoder stopped with 'max_decoder_steps")
-                break
+                print("   | > Decoder stopped with max_decoder_steps")
+                raise Exception("Decoder stopped with max_decoder_steps")
 
             memory = self._update_memory(decoder_output)
             t += 1
