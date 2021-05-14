@@ -5,8 +5,8 @@
 //"restore_path":"../../datasets/training/checkpoints/vctk-jia-2018-per-sample-May-27-2020_04+30PM-788bb40/best_model.pth.tar",
 {
     "model": "Tacotron2",          // one of the model in models/
-    "run_name": "5th-private-rhythm",
-    "run_description": "tacotron2 multi speaker with CorentinJ speaker Encoder,  DDC and  GST with speaker_embedding",
+    "run_name": "6th-niuman-1st",
+    "run_description": "",
 
     // AUDIO PARAMETERS
     "audio":{
@@ -125,7 +125,7 @@
     "speaker_encoder_checkpoint_path": "../best_model.pth.tar", // Speaker Encoder Checkpoint full path
     "use_speaker_embedding": true,     // use speaker embedding to enable multi-speaker learning.
     "use_external_speaker_embedding_file": true, // if true, forces the model to use external embedding per sample instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
-    "external_speaker_embedding_file": "../../speaker_embeddings/speakers_all_eng.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
+    "external_speaker_embedding_file": "../../speaker_embeddings/new_speakers.json", // if not null and use_external_speaker_embedding_file is true, it is used to load a specific embedding file and thus uses these embeddings instead of nn.embeddings, that is, it supports external embeddings such as those used at: https://arxiv.org/abs /1806.04558
     "freeze_encoder": false,
     "freeze_decoder": false,
     "freeze_postnet": false,
@@ -149,7 +149,7 @@
             {
                 "name": "niuman",
                 "path": "/data2/wangjiaqi/datasets/new_man_data_all",
-                "meta_file_train": "label_p.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
+                "meta_file_train": "label_4999.txt", // for vtck if list, ignore speakers id in list for train, its useful for test cloning with new speakers
                 "meta_file_val": null
             },
             {
