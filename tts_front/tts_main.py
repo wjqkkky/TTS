@@ -56,7 +56,8 @@ def regula_specail(chinese: str):
         if parenthese[-1] in number_list:
             # chinese = chinese.replace(parenthese[-1] + ')', parenthese[-1] + ',').replace('(', '')
             chinese = chinese.replace(parenthese[-1] + ')', parenthese[-1] + '、').replace('(', '')
-    chinese = chinese.replace('(', '“').replace(')', '“')
+    # chinese = chinese.replace('(', '“').replace(')', '“')#将（）左右括号转化为#1
+    chinese = chinese.replace('(', '“').replace(')', '')#将“（”转化为#1，“）”省略
     # chinese = chinese.replace('(', ',').replace(')', ',')
     # ###正则化匹配“第*条|章 ”规则，匹配规则：只要为"第***+空格"替换为"第***,"***字符串的个数为3
     # regular = r'[第]+(.*?)+[章 ]'

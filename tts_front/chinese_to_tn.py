@@ -633,17 +633,21 @@ class date2chn:
         if len(dateNum) == 2:
             try:
                 time_num = time.strptime(self.date2chn, '%H:%M')
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + '点' + Cardinal(
-                    cardinal=dateNum[1]).cardinal2chntext() + '分'
+                time_str = Cardinal(cardinal=str(time_num.tm_hour)).cardinal2chntext() + '点' + Cardinal(
+                    cardinal=str(time_num.tm_min)).cardinal2chntext() + '分'
+                time_str = time_str.replace('零点', '').replace('零分', '')
+                return time_str
             except:
                 return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ',' + Cardinal(
                     cardinal=dateNum[1]).cardinal2chntext() + '，'
         if len(dateNum) == 3:
             try:
                 time_num = time.strptime(self.date2chn, '%H:%M:%S')
-                return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + \
-                       '点' + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '分' + \
-                       Cardinal(cardinal=dateNum[2]).cardinal2chntext() + '秒'
+                time_str = Cardinal(cardinal=str(time_num.tm_hour)).cardinal2chntext() + '点' + Cardinal(
+                    cardinal=str(time_num.tm_min)).cardinal2chntext() + '分' + Cardinal(
+                    cardinal=str(time_num.tm_sec)).cardinal2chntext() + '秒'
+                time_str = time_str.replace('零点', '').replace('零分', '').replace('零秒','')
+                return time_str
             except:
                 return Cardinal(cardinal=dateNum[0]).cardinal2chntext() + ',' \
                        + Cardinal(cardinal=dateNum[1]).cardinal2chntext() + '，' + Cardinal(
@@ -695,7 +699,8 @@ class NSWNormalizer:
     def normalize(self):
         text = self.raw_text
         # 是否按照日期读取2021/3/5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开，若为两位，则11/12保持不变
-        pattern = re.compile(r'(\d+/\d+(/\d+)?)')
+        pattern = re.compile(r'(\d+[*]?/[*]?\d+([*]?/[*]?\d+)?)')
+        # pattern = re.compile(r'(\d+/\d+(/\d+)?)')
         matchers = pattern.findall(text)
         matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
         for matcher in matchers:
@@ -708,7 +713,7 @@ class NSWNormalizer:
             text = text.replace(matcher, matcher.replace('-', '*'))
 
         # 是否按照日期读取2021-3-5格式的日期，若不是正确的日期数字，则改为2021，11，42用逗号隔开,若为两位，则改为11-12改为11至12
-        pattern = re.compile(r'(\d+-\d+(-\d+)?)')
+        pattern = re.compile(r'(\d+[*]?-[*]?\d+([*]?-[*]?\d+)?)')
         matchers = pattern.findall(text)
         matchers = sorted(matchers, key=lambda i: len(i[0]), reverse=True)
         for matcher in matchers:
@@ -867,6 +872,6 @@ def nsw_test():
 
 
 if __name__ == '__main__':
-    test = '填写耗时约10-30分钟，'
+    test = '2021*/10*/21'
     chinese = NSWNormalizer(test).normalize()
     print(chinese)

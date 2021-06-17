@@ -26,7 +26,7 @@ class Grapheme2phoneme:
         self.chinese_split = chinese_split
         self.chinese_u2v = chinese_u2v
         self.read_as_alphabet = read_as_alphabet
-        self.zimu_read = ['a', 'it', 'led', 'mm', 'id']
+        self.zimu_read = ['a', 'it', 'led', 'mm', 'id', 'at']
 
     def chinese2phoneme(self, word: str):
         """

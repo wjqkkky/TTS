@@ -8,6 +8,7 @@ import numpy as np
 import re
 import sys
 import codecs
+
 sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 sys.stdout.write("Your content....")
 #trans to prosody tagged format

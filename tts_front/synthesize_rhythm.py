@@ -31,7 +31,7 @@ class ModelRhythm:
                         chinese_rhy = ending_add_rhy(chinese_rhy)
                     chinese_rhy = self.merge_rh(chinese_rhy)  # 4
                 except Exception as e:
-                    print('long sentence add rhy model add error', e.args)
+                    print('long sentence add rhy model add error', e)
                     chinese_rhy = ending_add_rhy(chinese_rm_symbol)
             else:
                 chinese_rhy = ending_add_rhy(chinese_rm_symbol)
@@ -129,7 +129,7 @@ class ModelRhythm:
                 if '#' not in chinese_rhy:
                     chinese_rhy = ending_add_rhy(chinese_rhy)
             except Exception as e:
-                print('add error ', e.args)
+                print('add error ', e)
                 chinese_rhy = ending_add_rhy(chinese_rm_symbols)
         return chinese_rhy
 
