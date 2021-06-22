@@ -252,10 +252,12 @@ if __name__ == "__main__":
     parser.add_argument('--host', default="0.0.0.0", help='Host of Http service')
     parser.add_argument('--fraction', default=0.5, help='Usage rate of per GPU.')
     parser.add_argument('--frontend_mode', default=1, help='Usage rate of per GPU.')
+    parser.add_argument('--environment', default="platform", help='Deployment environment')
 
     args = parser.parse_args()
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    deploy_environment = args.environment
     taco_model_path = os.path.join(args.taco_model)
     wavegrad_model_path = os.path.join(args.wavegrad_model)
     ebd_file_path = os.path.join(args.ebd_file)
@@ -282,11 +284,15 @@ if __name__ == "__main__":
         logging.exception(e)
     logging.config.dictConfig(yaml.load(open('logging.yaml', 'r')))
     logging.info("TTS service started...")
-    # print(logging.handlers)
-    application = tornado.web.Application([
-        (r"/", MainHandler),
-        (r"//synthesize", SynHandler),
-    ])
-
+    if deploy_environment == "platform":
+        application = tornado.web.Application([
+            (r"/qicheren", MainHandler),
+            (r"/qicheren/synthesize", SynHandler),
+        ])
+    else:
+        application = tornado.web.Application([
+            (r"/", MainHandler),
+            (r"//synthesize", SynHandler),
+        ])
     application.listen(int(args.port), xheaders=True)
     tornado.ioloop.IOLoop.instance().start()
